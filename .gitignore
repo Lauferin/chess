@@ -1,0 +1,35 @@
+# back end project:
+
+db.sqlite3
+chess_proj/__pycache__
+
+
+# back end api:
+
+chess_api/__pycache__
+chess_api/migrations/__pycache__
+
+
+# front end:
+
+# dependencies
+chess-fe/node_modules
+chess-fe/.pnp
+chess-fe/.pnp.js
+
+# testing
+chess-fe//coverage
+
+# production
+chess-fe//build
+
+# misc
+chess-fe/.DS_Store
+chess-fe/.env.local
+chess-fe/.env.development.local
+chess-fe/.env.test.local
+chess-fe/.env.production.local
+
+chess-fe/npm-debug.log*
+chess-fe/yarn-debug.log*
+chess-fe/yarn-error.log*
