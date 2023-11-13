@@ -1,5 +1,3 @@
-import React, { Component } from "react";
-
 import Rook from '../pieces/rook/Rook.js'
 import Pawn from '../pieces/pawn/Pawn.js'
 import Queen from '../pieces/queen/Queen.js'
@@ -8,20 +6,18 @@ import Knight from '../pieces//knight/Knight.js'
 import Bishop from '../pieces/bishop/Bishop.js'
 
 
-class Piece extends Component {
+const Piece = ({ nature, row, column, board, color, handleCellClicked }) => {
 
-    render() {
-        switch(this.props.nature) {
-            case "rook": return (<div><Rook color={this.props.color}/></div>);
-            case "pawn": return (<div><Pawn color={this.props.color} /></div>);
-            case "queen": return (<div><Queen color={this.props.color} /></div>);
-            case "king": return (<div><King color={this.props.color} /></div>);
-            case "knight": return (<div><Knight color={this.props.color} /></div>);
-            case "bishop": return (<div><Bishop color={this.props.color} /></div>);
-            default: return(<div></div>)
-        }
+    switch(nature) {
+        case "rook": return (<div><Rook color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        case "pawn": return (<div><Pawn color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        case "queen": return (<div><Queen color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        case "king": return (<div><King color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        case "knight": return (<div><Knight color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        case "bishop": return (<div><Bishop color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
+        default: return(<div onClick={() => handleCellClicked(row, column, [])}>&nbsp;</div>) // PONER EN ESTE TAMBIEN HANDLECELLCLICKED, PERO QUE VAYA DIRECTO AL PADRE. 
+        // EN EL RESTO DEVOLVER A ALGUN HOOK LOS MOVIMIENTOS POSIBLES (SI ES PICKED)
     }
-
 }
 
 export default Piece
