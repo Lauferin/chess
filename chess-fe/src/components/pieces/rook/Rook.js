@@ -55,7 +55,6 @@ const Rook = ({ row, column, board, color, handleCellClicked }) => {
                 break;
             }
         }
-        console.log("allowed", allowedMovements)
         handleCellClicked(row, column, allowedMovements)
     }
 
