@@ -16,7 +16,7 @@ const ChessBoard = () => {
 				[null, null, null, null, null, null, null, null],
 				[null, null, null, null, null, null, null, null],
 				[null, null, null, null, null, null, null, null],
-				["king", null, null, null, null, null, null, null],
+				[null, "king", null, null, null, null, null, null],
 				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
 				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
 			]
@@ -36,7 +36,7 @@ const ChessBoard = () => {
 				}
 				newMatrix.push(row);
 			}
-			newMatrix[5][0].valueColor = 'white'
+			newMatrix[5][1].valueColor = 'white'
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());

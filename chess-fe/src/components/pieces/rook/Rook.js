@@ -45,7 +45,6 @@ const Rook = ({ row, column, board, color, handleCellClicked }) => {
         i = row; // move forward
         while (i > 0) {
             --i;
-            console.log(i, board[row][i].valueColor)
             if (board[i][column].value === null) {
                 allowedMovements.push([i, column])
             } else {
