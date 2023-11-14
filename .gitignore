@@ -1,7 +1,8 @@
-# back end project:
+# back end project and general:
 
 db.sqlite3
 chess_proj/__pycache__
+todo.md
 
 
 # back end api:

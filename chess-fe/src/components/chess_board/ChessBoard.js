@@ -15,7 +15,7 @@ const ChessBoard = () => {
 				[null, 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
 				[null, null, null, null, null, null, null, null],
 				[null, null, null, null, null, null, null, null],
-				["knight", null, null, null, null, null, null, null],
+				[null, null, null, null, null, null, null, null],
 				["king", null, null, null, null, null, null, null],
 				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
 				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
@@ -37,16 +37,12 @@ const ChessBoard = () => {
 				newMatrix.push(row);
 			}
 			newMatrix[5][0].valueColor = 'white'
-			newMatrix[4][0].valueColor = 'white'
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
 	}, []);
 
 	const handleCellClicked = (rowIndex, cellIndex, futureAllowedMovements) => {
-		// missing:
-		// pawn becoming another piece
-		// king should not move to checked position
 		console.log("row", rowIndex, "column", cellIndex)
 		const cellBoard = board[rowIndex][cellIndex]
 		if (picked) {  // If a cell was previously picked
