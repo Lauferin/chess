@@ -125,15 +125,85 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 			}    
 		}
 
+		// threatens from king, pawn or knight
+		if (possibleColumn > 0) {
+			if (possibleRow > 0 && isPawnOrKing(board[possibleRow - 1][possibleColumn - 1])) {
+				return true;
+			}
+			if (possibleRow < 7 && isKing(board[possibleRow + 1][possibleColumn - 1])) {
+				return true;
+			}
+			if (isKing(board[possibleRow][possibleColumn - 1])) {
+				return true;
+			}
+			if (possibleRow < 6 && isKnight(board[possibleRow + 2][possibleColumn - 1])) {
+				return true;
+			}
+			if (possibleRow > 1 && isKnight(board[possibleRow - 2][possibleColumn - 1])) {
+				return true;
+			}
+		}
+		if (possibleColumn < 7) {
+			if (possibleRow > 0 && isPawnOrKing(board[possibleRow - 1][possibleColumn + 1])) {
+				return true;
+			}
+			if (possibleRow < 7 && isKing(board[possibleRow + 1][possibleColumn + 1])) {
+				return true;
+			}
+			if (isKing(board[possibleRow][possibleColumn + 1])) {
+				return true;
+			}
+			if (possibleRow < 6 && isKnight(board[possibleRow + 2][possibleColumn + 1])) {
+				return true;
+			}
+			if (possibleRow > 1 && isKnight(board[possibleRow - 2][possibleColumn + 1])) {
+				return true;
+			}
+		}
+		if (possibleRow > 0) {
+			if (isKing(board[possibleRow - 1][possibleColumn])) {
+				return true;
+			}
+			if (possibleColumn > 1 && isKnight(board[possibleRow - 1][possibleColumn - 2])) {
+				return true;
+			}
+			if (possibleColumn < 6 && isKnight(board[possibleRow - 1][possibleColumn + 2])) {
+				return true;
+			}
+		}
+		if (possibleRow < 7) {	
+			if (isKing(board[possibleRow + 1][possibleColumn])) {
+				return true;
+			}
+			if (possibleColumn > 1 && isKnight(board[possibleRow + 1][possibleColumn - 2])) {
+				return true;
+			}
+			if (possibleColumn < 6 && isKnight(board[possibleRow + 1][possibleColumn + 2])) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	const isRookOrQueen = (position) => {
-		return position.valueColor === "black" && (position.value === "rook" || position.value === "queen")
+		return position.valueColor === "black" && (position.value === "rook" || position.value === "queen");
 	}
 
 	const isBishopOrQueen = (position) => {
-		return position.valueColor === "black" && (position.value === "bishop" || position.value === "queen")
+		return position.valueColor === "black" && (position.value === "bishop" || position.value === "queen");
+	}
+	
+	const isKing = (position) => {
+		return position.valueColor === "black" && position.value === "king";
+	}
+
+	const isPawnOrKing = (position) => {
+		return position.valueColor === "black" && (position.value === "pawn" || position.value === "king");
+	}
+
+	const isKnight = (position) => {
+		return position.valueColor === "black" && position.value === "knight";
 	}
 
 	const kingImage = color === 'white' ? whiteKing : blackKing
