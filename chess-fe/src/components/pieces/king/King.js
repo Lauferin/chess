@@ -42,7 +42,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		let i = possibleColumn; // move right
 		while (i < 7) {
 			++i;
-			if (board[possibleRow][i].value !== null) {
+			if (isTherePiece(board[possibleRow][i])) {
 				if (isRookOrQueen(board[possibleRow][i])) {
 					return true;
 				}
@@ -52,7 +52,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleColumn; // move left
 		while (i > 0) {
 			--i;
-			if (board[possibleRow][i].value !== null) {
+			if (isTherePiece(board[possibleRow][i])) {
 				if (isRookOrQueen(board[possibleRow][i])) {
 					return true;
 				}
@@ -62,7 +62,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; // move backwards
 		while (i < 7) {
 			++i;
-			if (board[i][possibleColumn].value !== null) {
+			if (isTherePiece(board[i][possibleColumn])) {
 				if (isRookOrQueen(board[i][possibleColumn])) {
 					return true;
 				}
@@ -72,7 +72,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; // move forward
 		while (i > 0) {
 			--i;
-			if (board[i][possibleColumn].value !== null) {
+			if (isTherePiece(board[i][possibleColumn])) {
 				if (isRookOrQueen(board[i][possibleColumn])) {
 					return true;
 				}
@@ -84,7 +84,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; let j = possibleColumn; // move right backwards
 		while (i < 7 && j < 7) {
 			++i; ++j;
-			if (board[i][j].value !== null) {
+			if (isTherePiece(board[i][j])) {
 				if (isBishopOrQueen(board[i][j])) {
 					return true;
 				}
@@ -94,11 +94,8 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; j = possibleColumn; // move right forward
 		while (i > 0 && j < 7) {
 			--i; ++j;
-			console.log("aaa", possibleRow, possibleColumn, i, j)
-			if (board[i][j].value !== null) {
-				console.log("bbb")
+			if (isTherePiece(board[i][j])) {
 				if (isBishopOrQueen(board[i][j])) {
-					console.log("ccc")
 					return true;
 				}
 				break;
@@ -107,7 +104,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; j = possibleColumn; // move left backwards
 		while (i < 7 && j > 0) {
 			++i; --j;
-			if (board[i][j].value !== null) {
+			if (isTherePiece(board[i][j])) {
 				if (isBishopOrQueen(board[i][j])) {
 					return true;
 				}
@@ -117,7 +114,7 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		i = possibleRow; j = possibleColumn; // move left forward
 		while (i > 0 && j > 0) {
 			--i; --j;
-			if (board[i][j].value !== null) {
+			if (isTherePiece(board[i][j])) {
 				if (isBishopOrQueen(board[i][j])) {
 					return true;
 				}
@@ -184,6 +181,10 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 		}
 
 		return false;
+	}
+
+	const isTherePiece = (position) => {
+		return position.value !== null && !(position.value === "king" && position.valueColor === "white") 
 	}
 
 	const isRookOrQueen = (position) => {
