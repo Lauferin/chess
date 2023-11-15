@@ -4,8 +4,12 @@ import whiteKnight from '../pieces/knight/white_knight.svg'
 import whiteBishop from '../pieces/bishop/white_bishop.svg'
 import whiteRook from '../pieces/rook/white_rook.svg'
 import whiteQueen from '../pieces/queen/white_queen.svg'
+import blackKnight from '../pieces/knight/black_knight.svg'
+import blackBishop from '../pieces/bishop/black_bishop.svg'
+import blackRook from '../pieces/rook/black_rook.svg'
+import blackQueen from '../pieces/queen/black_queen.svg'
 
-const Promotion = ({ setPawnToPromote, move, cellBoard }) => {
+const Promotion = ({ setPawnToPromote, move, cellBoard, player }) => {
 
 	const handleOptionClick = (promoteTo) => {
 		move(cellBoard, promoteTo);
@@ -17,10 +21,10 @@ const Promotion = ({ setPawnToPromote, move, cellBoard }) => {
 	};
 	
 	const options = [
-		{ id: 1, label: 'knight', imageUrl: whiteKnight },
-		{ id: 2, label: 'bishop', imageUrl: whiteBishop },
-		{ id: 3, label: 'rook', imageUrl: whiteRook },
-		{ id: 4, label: 'queen', imageUrl: whiteQueen },
+		{ id: 1, label: 'knight', imageUrl: player === "white" ? whiteKnight : blackKnight },
+		{ id: 2, label: 'bishop', imageUrl: player === "white" ? whiteBishop : blackBishop },
+		{ id: 3, label: 'rook', imageUrl: player === "white" ? whiteRook : blackRook },
+		{ id: 4, label: 'queen', imageUrl: player === "white" ? whiteQueen : blackQueen},
 	];
 	
 	return (

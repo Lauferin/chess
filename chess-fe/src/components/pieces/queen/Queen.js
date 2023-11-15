@@ -1,9 +1,10 @@
 import blackQueen from './black_queen.svg'
 import whiteQueen from './white_queen.svg'
 
-const Queen = ({ row, column, board, color, handleCellClicked }) => {
+const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 
 	const handleQueenClicked = () => {
+		const opponent = player === "white" ? "black" : "white";
 		const allowedMovements = [];
 
 		// bishop movements
@@ -13,7 +14,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -25,7 +26,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -37,7 +38,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -49,7 +50,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -63,7 +64,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[row][i].value === null) {
 				allowedMovements.push([row, i])
 			} else {
-				if (board[row][i].valueColor === "black") {
+				if (board[row][i].valueColor === opponent) {
 					allowedMovements.push([row, i])
 				}
 				break;
@@ -75,7 +76,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[row][i].value === null) {
 				allowedMovements.push([row, i])
 			} else {
-				if (board[row][i].valueColor === "black") {
+				if (board[row][i].valueColor === opponent) {
 					allowedMovements.push([row, i])
 				}
 				break;
@@ -87,7 +88,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][column].value === null) {
 				allowedMovements.push([i, column])
 			} else {
-				if (board[i][column].valueColor === "black") {
+				if (board[i][column].valueColor === opponent) {
 					allowedMovements.push([i, column])
 				}
 				break;
@@ -99,7 +100,7 @@ const Queen = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][column].value === null) {
 				allowedMovements.push([i, column])
 			} else {
-				if (board[i][column].valueColor === "black") {
+				if (board[i][column].valueColor === opponent) {
 					allowedMovements.push([i, column])
 				}
 				break;

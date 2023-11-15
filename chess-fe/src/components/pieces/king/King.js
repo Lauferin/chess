@@ -1,29 +1,31 @@
 import blackKing from './black_king.svg'
 import whiteKing from './white_king.svg'
 
-const King = ({ row, column, board, color, handleCellClicked }) => {
+const King = ({ row, column, board, color, player, handleCellClicked }) => {
+
+	const opponent = player === "white" ? "black" : "white";
 
 	const handleKingClicked = () => {
 		const allowedMovements = [];
 		if (column > 0) {
-			if (row > 0 && board[row - 1][column - 1].valueColor !== "white" && !isCheck(row - 1, column - 1)) {
+			if (row > 0 && board[row - 1][column - 1].valueColor !== player && !isCheck(row - 1, column - 1)) {
 				allowedMovements.push([row - 1, column - 1])
 			}
-			if (row < 7 && board[row + 1][column - 1].valueColor !== "white" && !isCheck(row + 1, column - 1)) {
+			if (row < 7 && board[row + 1][column - 1].valueColor !== player && !isCheck(row + 1, column - 1)) {
 				allowedMovements.push([row + 1, column - 1])
 			}
-			if (board[row][column - 1].valueColor !== "white" && !isCheck(row, column - 1)) {
+			if (board[row][column - 1].valueColor !== player && !isCheck(row, column - 1)) {
 				allowedMovements.push([row, column - 1])
 			}
 		}
 		if (column < 7) {
-			if (row > 0 && board[row - 1][column + 1].valueColor !== "white" && !isCheck(row - 1, column + 1)) {
+			if (row > 0 && board[row - 1][column + 1].valueColor !== player && !isCheck(row - 1, column + 1)) {
 				allowedMovements.push([row - 1, column + 1])
 			}
-			if (row < 7 && board[row + 1][column + 1].valueColor !== "white" && !isCheck(row + 1, column + 1)) {
+			if (row < 7 && board[row + 1][column + 1].valueColor !== player && !isCheck(row + 1, column + 1)) {
 				allowedMovements.push([row + 1, column + 1])
 			}
-			if (board[row][column + 1].valueColor !== "white" && !isCheck(row, column + 1)) {
+			if (board[row][column + 1].valueColor !== player && !isCheck(row, column + 1)) {
 				allowedMovements.push([row, column + 1])
 			}
 		}
@@ -184,27 +186,27 @@ const King = ({ row, column, board, color, handleCellClicked }) => {
 	}
 
 	const isTherePiece = (position) => {
-		return position.value !== null && !(position.value === "king" && position.valueColor === "white") 
+		return position.value !== null && !(position.value === "king" && position.valueColor === player) 
 	}
 
 	const isRookOrQueen = (position) => {
-		return position.valueColor === "black" && (position.value === "rook" || position.value === "queen");
+		return position.valueColor === opponent && (position.value === "rook" || position.value === "queen");
 	}
 
 	const isBishopOrQueen = (position) => {
-		return position.valueColor === "black" && (position.value === "bishop" || position.value === "queen");
+		return position.valueColor === opponent && (position.value === "bishop" || position.value === "queen");
 	}
 	
 	const isKing = (position) => {
-		return position.valueColor === "black" && position.value === "king";
+		return position.valueColor === opponent && position.value === "king";
 	}
 
 	const isPawnOrKing = (position) => {
-		return position.valueColor === "black" && (position.value === "pawn" || position.value === "king");
+		return position.valueColor === opponent && (position.value === "pawn" || position.value === "king");
 	}
 
 	const isKnight = (position) => {
-		return position.valueColor === "black" && position.value === "knight";
+		return position.valueColor === opponent && position.value === "knight";
 	}
 
 	const kingImage = color === 'white' ? whiteKing : blackKing

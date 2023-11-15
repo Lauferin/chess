@@ -1,9 +1,10 @@
 import blackBishop from './black_bishop.svg'
 import whiteBishop from './white_bishop.svg'
 
-const Bishop = ({ row, column, board, color, handleCellClicked }) => {
+const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 
 	const handleBishopClicked = () => {
+		const opponent = player === "white" ? "black" : "white";
 		const allowedMovements = [];
 		let i = row; let j = column; // move right backwards
 		while (i < 7 && j < 7) {
@@ -11,7 +12,7 @@ const Bishop = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -23,7 +24,7 @@ const Bishop = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -35,7 +36,7 @@ const Bishop = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -47,7 +48,7 @@ const Bishop = ({ row, column, board, color, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === "black") {
+				if (board[i][j].valueColor === opponent) {
 					allowedMovements.push([i, j])
 				}
 				break;

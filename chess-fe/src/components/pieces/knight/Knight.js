@@ -1,23 +1,22 @@
 import blackKnight from './black_knight.svg'
 import whiteKnight from './white_knight.svg'
 
-const Knight = ({ row, column, board, color, handleCellClicked }) => {
+const Knight = ({ row, column, board, color, player, handleCellClicked }) => {
 
 	const handleKnightClicked = () => {
 		const allowedMovements = [];
-		console.log(row)
 		if (row > 0) { // one forward, two right and left
-			if (column < 6 && board[row - 1][column + 1].valueColor !== "white") {
+			if (column < 6 && board[row - 1][column + 1].valueColor !== player) {
 				allowedMovements.push([row - 1, column + 2])
 			}
-			if (column > 1 && board[row - 1][column - 1].valueColor !== "white") {
+			if (column > 1 && board[row - 1][column - 1].valueColor !== player) {
 				allowedMovements.push([row - 1, column - 2])
 			}
 			if (row > 1) { // two forward, right and left
-				if (column < 7 && board[row - 2][column + 1].valueColor !== "white") {
+				if (column < 7 && board[row - 2][column + 1].valueColor !== player) {
 					allowedMovements.push([row - 2, column + 1])
 				}
-				if (column > 0 && board[row - 2][column - 1].valueColor !== "white") {
+				if (column > 0 && board[row - 2][column - 1].valueColor !== player) {
 					allowedMovements.push([row - 2, column - 1])
 				}
 			}
