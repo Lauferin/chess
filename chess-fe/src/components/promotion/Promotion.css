@@ -1,0 +1,46 @@
+.external-column {
+	position: relative;
+}
+
+.options-column {
+	position: absolute;
+	top: -80px; /* Adjust as needed */
+	right: -150px; /* Adjust as needed */
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+  
+.option {
+	cursor: pointer;
+	margin-right: 10px;
+	padding: 8px;
+	border-radius: 8px;
+	border: 1px solid #ccc;
+	transition: background-color 0.3s ease;
+}
+  
+.option img {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+}
+  
+.option.selected {
+	background-color: #ddd;
+}
+
+.cancel-button {
+	margin-top: 10px;
+	padding: 10px;
+	background-color: #ff5555;
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+  
+.cancel-button:hover {
+	background-color: #ff3333;
+}

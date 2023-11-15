@@ -1,12 +1,14 @@
 import React, { useState, useEffect, Fragment } from "react";
-import "./ChessBoard.css"
-import Piece from '../piece/Piece.js'
+import "./ChessBoard.css";
+import Piece from '../piece/Piece.js';
+import Promotion from "../promotion/Promotion";
 
 const ChessBoard = () => {
 
 	const [board, setBoard] = useState([]);
-	const [picked, setPicked] = useState();
+	const [picked, setPicked] = useState(null);
 	const [allowedMovements, setAllowedMovements] = useState([]);
+	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
 
 	useEffect(() => {
 		const generateBoardChess = () => {
@@ -49,9 +51,10 @@ const ChessBoard = () => {
 			const { pickedRow, pickedColumn } = picked;
 			const pickedCell = board[pickedRow][pickedColumn];
 			if (pickedRow === rowIndex && pickedColumn === columnIndex) { // it's the same piece
-				setPicked(); // not picked anymore
+				setPicked(null); // not picked anymore
 				setAllowedMovements([]);
 				pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color
+				setPawnToPromote(-1);
 			} else { // it's not the piece
 				if (cellBoard.valueColor === "white") { // if it's another piece and it's also white, change
 					setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
@@ -63,22 +66,17 @@ const ChessBoard = () => {
 					}
 					board[rowIndex][columnIndex].cellColor = 'red';    
 					pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color
+					setPawnToPromote(-1);
 				} else { // it wants to move there
 					// console.log(allowedMovements, [rowIndex, columnIndex], allowedMovements.includes([rowIndex, columnIndex]))
 					if (includesArray(allowedMovements, [rowIndex, columnIndex])) { // it's legal
 						if (rowIndex === 0 && pickedCell.value === "pawn") { // a pawn has got to the edge
-							console.log("yupi!")
+							setPawnToPromote(columnIndex)
 						} else { // move!!!
-							cellBoard.value = pickedCell.value
-							cellBoard.valueColor = pickedCell.valueColor
-							pickedCell.value = null
-							pickedCell.valueColor = null
-							setPicked()
-							setAllowedMovements([])
-							pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color	
+							move(cellBoard, null);
+							return;
 						}
 					}
-					// did you eat someone?
 				}
 			}
 		} else { // no cell previously picked
@@ -96,6 +94,19 @@ const ChessBoard = () => {
 				console.log("not a white piece!")
 			}
 		}
+		setBoard([...board]); 
+	}
+
+	const move = (cellBoard, promoted) => {
+		const { pickedRow, pickedColumn } = picked;
+		const pickedCell = board[pickedRow][pickedColumn];
+		cellBoard.value = promoted ? promoted : pickedCell.value
+		cellBoard.valueColor = pickedCell.valueColor
+		pickedCell.value = null
+		pickedCell.valueColor = null
+		setPicked(null)
+		setAllowedMovements([])
+		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color	
 		setBoard([...board]); 
 	}
 
@@ -236,6 +247,8 @@ const ChessBoard = () => {
 									style={{ backgroundColor: cell.cellColor}}
 									// onClick={() => handleCellClicked(rowIndex, cellIndex)}
 								>
+									{pawnToPromote === cellIndex && rowIndex === 0 && 
+										<Promotion setPawnToPromote={setPawnToPromote} move={move} cellBoard={board[rowIndex][cellIndex]} />}
 									<Piece nature={cell.value} row={rowIndex} column={cellIndex} board={board} color={cell.valueColor}
 										handleCellClicked={handleCellClicked} />
 								</td>
