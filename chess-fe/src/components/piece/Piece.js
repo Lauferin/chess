@@ -15,8 +15,7 @@ const Piece = ({ nature, row, column, board, color, handleCellClicked }) => {
 		case "king": return (<div><King color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
 		case "knight": return (<div><Knight color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
 		case "bishop": return (<div><Bishop color={color} row={row} column={column} board={board} handleCellClicked={handleCellClicked} /></div>);
-		default: return(<div onClick={() => handleCellClicked(row, column, [])}>&nbsp;</div>) // PONER EN ESTE TAMBIEN HANDLECELLCLICKED, PERO QUE VAYA DIRECTO AL PADRE. 
-		// EN EL RESTO DEVOLVER A ALGUN HOOK LOS MOVIMIENTOS POSIBLES (SI ES PICKED)
+		default: return(<div onClick={() => handleCellClicked(row, column, [])}>&nbsp;</div>);
 	}
 }
 

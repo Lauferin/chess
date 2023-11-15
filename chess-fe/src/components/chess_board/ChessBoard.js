@@ -42,47 +42,50 @@ const ChessBoard = () => {
 		setBoard(generateBoardChess());
 	}, []);
 
-	const handleCellClicked = (rowIndex, cellIndex, futureAllowedMovements) => {
-		console.log("row", rowIndex, "column", cellIndex)
-		const cellBoard = board[rowIndex][cellIndex]
+	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements) => {
+		console.log("row", rowIndex, "column", columnIndex)
+		const cellBoard = board[rowIndex][columnIndex]
 		if (picked) {  // If a cell was previously picked
-			const { row, cell } = picked;
-			if (row === rowIndex && cell === cellIndex) { // it's the same piece
+			const { pickedRow, pickedColumn } = picked;
+			const pickedCell = board[pickedRow][pickedColumn];
+			if (pickedRow === rowIndex && pickedColumn === columnIndex) { // it's the same piece
 				setPicked(); // not picked anymore
 				setAllowedMovements([]);
-				board[row][cell].cellColor = (row + cell) % 2 === 1 ? 'white' : 'gray'; // reset its color
+				pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color
 			} else { // it's not the piece
 				if (cellBoard.valueColor === "white") { // if it's another piece and it's also white, change
-					setPicked({ row: rowIndex, cell: cellIndex });
-					if (isCheckIfMoved(rowIndex, cellIndex)) {
+					setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
+					if (isCheckIfMoved(rowIndex, columnIndex)) {
 						setAllowedMovements([]);
 						console.log("if moved, check")
 					} else {
 						setAllowedMovements(futureAllowedMovements);
 					}
-						board[rowIndex][cellIndex].cellColor = 'red';    
-					board[row][cell].cellColor = (row + cell) % 2 === 1 ? 'white' : 'gray'; // reset its color
+					board[rowIndex][columnIndex].cellColor = 'red';    
+					pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color
 				} else { // it wants to move there
-					console.log(allowedMovements, [rowIndex, cellIndex], allowedMovements.includes([rowIndex, cellIndex]))
-					const includesArray = (data, arr) => {
-						return data.some(e => Array.isArray(e) && e.every((o, i) => Object.is(arr[i], o)));
-					}
-					if (includesArray(allowedMovements, [rowIndex, cellIndex])) { // it's legal, move!
-						cellBoard.value = board[row][cell].value
-						cellBoard.valueColor = board[row][cell].valueColor
-						board[row][cell].value = null
-						board[row][cell].valueColor = null
-						setPicked()
-						setAllowedMovements([])
-						board[row][cell].cellColor = (row + cell) % 2 === 1 ? 'white' : 'gray'; // reset its color
+					// console.log(allowedMovements, [rowIndex, columnIndex], allowedMovements.includes([rowIndex, columnIndex]))
+					if (includesArray(allowedMovements, [rowIndex, columnIndex])) { // it's legal
+						if (rowIndex === 0 && pickedCell.value === "pawn") { // a pawn has got to the edge
+							console.log("yupi!")
+						} else { // move!!!
+							cellBoard.value = pickedCell.value
+							cellBoard.valueColor = pickedCell.valueColor
+							pickedCell.value = null
+							pickedCell.valueColor = null
+							setPicked()
+							setAllowedMovements([])
+							pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === 1 ? 'white' : 'gray'; // reset its color	
+						}
 					}
 					// did you eat someone?
 				}
 			}
-		} else {
+		} else { // no cell previously picked
 			if (cellBoard.value && cellBoard.valueColor === 'white') {
-				setPicked({ row: rowIndex, cell: cellIndex });
-				if (isCheckIfMoved(rowIndex, cellIndex)) {
+				setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
+				if (isCheckIfMoved(rowIndex, columnIndex)) { // can't move this piece because it would result in check
+					// WARNING! what happens if the piece want's to eat the potential checking peace?
 					setAllowedMovements([]);
 					console.log("if moved, check")
 				} else {
@@ -213,6 +216,10 @@ const ChessBoard = () => {
 			return true;
 		}
 		return false;
+	}
+
+	const includesArray = (data, arr) => { // function that checks if array is instead of array. Regular .includes doesn't work because it's another object.
+		return data.some(e => Array.isArray(e) && e.every((o, i) => Object.is(arr[i], o)));
 	}
 
 	return (
