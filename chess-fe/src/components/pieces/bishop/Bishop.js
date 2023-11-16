@@ -3,7 +3,7 @@ import whiteBishop from './white_bishop.svg'
 
 const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 
-	const handleBishopClicked = () => {
+	const handleBishopClicked = (dragging) => {
 		const opponent = player === "white" ? "black" : "white";
 		const allowedMovements = [];
 		let i = row; let j = column; // move right backwards
@@ -54,14 +54,17 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 				break;
 			}    
 		}
-		handleCellClicked(row, column, allowedMovements)
+		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
 	const bishopImage = color === 'white' ? whiteBishop : blackBishop 
 	return (
 		<div 
 			onClick={() =>
-				handleBishopClicked()
+				handleBishopClicked(false)
+			}
+			onDragStart={() =>
+				handleBishopClicked(true)
 			}
 		>
 			<img src={bishopImage} alt="bishop" />

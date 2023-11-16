@@ -3,7 +3,7 @@ import whiteKnight from './white_knight.svg'
 
 const Knight = ({ row, column, board, color, player, handleCellClicked }) => {
 
-	const handleKnightClicked = () => {
+	const handleKnightClicked = (dragging) => {
 		const allowedMovements = [];
 		if (row > 0) { // one forward, two right and left
 			if (column < 6 && board[row - 1][column + 1].valueColor !== player) {
@@ -37,14 +37,17 @@ const Knight = ({ row, column, board, color, player, handleCellClicked }) => {
 				}
 			}
 		}
-		handleCellClicked(row, column, allowedMovements)
+		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
 	const knightImage = color === 'white' ? whiteKnight : blackKnight 
 	return (
 		<div 
 			onClick={() =>
-				handleKnightClicked()
+				handleKnightClicked(false)
+			}
+			onDragStart={() =>
+				handleKnightClicked(true)
 			}
 		>
 			<img src={knightImage} alt="knight" />

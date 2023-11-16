@@ -3,7 +3,7 @@ import whiteQueen from './white_queen.svg'
 
 const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 
-	const handleQueenClicked = () => {
+	const handleQueenClicked = (dragging) => {
 		const opponent = player === "white" ? "black" : "white";
 		const allowedMovements = [];
 
@@ -107,14 +107,17 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			}
 		}
 
-		handleCellClicked(row, column, allowedMovements)
+		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
 	const queenImage = color === 'white' ? whiteQueen : blackQueen 
 	return (
 		<div 
 			onClick={() =>
-				handleQueenClicked()
+				handleQueenClicked(false)
+			}
+			onDragStart={() =>
+				handleQueenClicked(true)
 			}
 		>
 			<img src={queenImage} alt="queen" />

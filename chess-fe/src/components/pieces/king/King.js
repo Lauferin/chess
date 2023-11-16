@@ -5,7 +5,7 @@ const King = ({ row, column, board, color, player, handleCellClicked }) => {
 
 	const opponent = player === "white" ? "black" : "white";
 
-	const handleKingClicked = () => {
+	const handleKingClicked = (dragging) => {
 		const allowedMovements = [];
 		if (column > 0) {
 			if (row > 0 && board[row - 1][column - 1].valueColor !== player && !isCheck(row - 1, column - 1)) {
@@ -35,7 +35,7 @@ const King = ({ row, column, board, color, player, handleCellClicked }) => {
 		if (row < 7 && !isCheck(row + 1, column)) {
 			allowedMovements.push([row + 1, column])
 		}
-		handleCellClicked(row, column, allowedMovements)
+		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
 	const isCheck = (possibleRow, possibleColumn) => {
@@ -214,7 +214,10 @@ const King = ({ row, column, board, color, player, handleCellClicked }) => {
 	return (
 		<div 
 			onClick={() =>
-				handleKingClicked()
+				handleKingClicked(false)
+			}
+			onDragStart={() =>
+				handleKingClicked(true)
 			}
 		>
 			<img src={kingImage} alt="king" />

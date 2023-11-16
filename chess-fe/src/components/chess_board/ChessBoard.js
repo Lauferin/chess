@@ -1,4 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
@@ -47,17 +49,19 @@ const ChessBoard = ({ game, player }) => {
 		setBoard(generateBoardChess());
 	}, [game, player, opponent, colorRest]);
 
-	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements) => {
+	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
 		console.log("row", rowIndex, "column", columnIndex)
 		const cellBoard = board[rowIndex][columnIndex]
 		if (picked) {  // If a cell was previously picked
 			const { pickedRow, pickedColumn } = picked;
 			const pickedCell = board[pickedRow][pickedColumn];
 			if (pickedRow === rowIndex && pickedColumn === columnIndex) { // it's the same piece
-				setPicked(null); // not picked anymore
-				setAllowedMovements([]);
-				pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color
-				setPawnToPromote(-1);
+				if (!dragging) { // not dragging, so the intention is to deselect it
+					setPicked(null); // not picked anymore
+					setAllowedMovements([]);
+					pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color
+					setPawnToPromote(-1);
+				}
 			} else { // it's not the piece
 				if (cellBoard.valueColor === player) { // if it's another piece and it's also white, change
 					setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
@@ -239,6 +243,7 @@ const ChessBoard = ({ game, player }) => {
 	return (
 		<Fragment>
 		<div className="ChessBoard-board">
+			<DndProvider backend={HTML5Backend}>
 			<table>
 				<tbody>
 					{board.map((row, rowIndex) => (
@@ -252,7 +257,8 @@ const ChessBoard = ({ game, player }) => {
 								>
 									{pawnToPromote === cellIndex && rowIndex === 0 && 
 										<Promotion setPawnToPromote={setPawnToPromote} move={move} cellBoard={board[rowIndex][cellIndex]} player={player} />}
-									<Piece nature={cell.value} row={rowIndex} column={cellIndex} board={board} color={cell.valueColor} player={player}
+									<Piece 
+										nature={cell.value} row={rowIndex} column={cellIndex} board={board} color={cell.valueColor} player={player}
 										handleCellClicked={handleCellClicked} />
 								</td>
 							))}
@@ -260,6 +266,7 @@ const ChessBoard = ({ game, player }) => {
 					))}
 				</tbody>
 			</table>
+			</DndProvider>
 		</div>
 		</Fragment>
 		);

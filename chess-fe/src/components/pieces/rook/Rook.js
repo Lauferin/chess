@@ -4,17 +4,17 @@ import whiteRook from './white_rook.svg'
 
 const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
 
-    const handleRookClicked = () => {
+    const handleRookClicked = (dragging) => {
 		const opponent = player === "white" ? "black" : "white";
         const allowedMovements = [];
         let i = column; // move right
         while (i < 7) {
             ++i;
             if (board[row][i].value === null) {
-                allowedMovements.push([row, i])
+                allowedMovements.push([row, i]);
             } else {
                 if (board[row][i].valueColor === opponent) {
-                    allowedMovements.push([row, i])
+                    allowedMovements.push([row, i]);
                 }
                 break;
             }
@@ -23,10 +23,10 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
         while (i > 0) {
             --i;
             if (board[row][i].value === null) {
-                allowedMovements.push([row, i])
+                allowedMovements.push([row, i]);
             } else {
                 if (board[row][i].valueColor === opponent) {
-                    allowedMovements.push([row, i])
+                    allowedMovements.push([row, i]);
                 }
                 break;
             }
@@ -35,10 +35,10 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
         while (i < 7) {
             ++i;
             if (board[i][column].value === null) {
-                allowedMovements.push([i, column])
+                allowedMovements.push([i, column]);
             } else {
                 if (board[i][column].valueColor === opponent) {
-                    allowedMovements.push([i, column])
+                    allowedMovements.push([i, column]);
                 }
                 break;
             }
@@ -47,23 +47,26 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
         while (i > 0) {
             --i;
             if (board[i][column].value === null) {
-                allowedMovements.push([i, column])
+                allowedMovements.push([i, column]);
             } else {
                 if (board[i][column].valueColor === opponent) {
-                    allowedMovements.push([i, column])
+                    allowedMovements.push([i, column]);
                 }
                 break;
             }
         }
-        handleCellClicked(row, column, allowedMovements)
+        handleCellClicked(row, column, allowedMovements, dragging);
     }
 
     const rookImage = color === 'white' ? whiteRook : blackRook 
     return (
         <div 
             onClick={() =>
-                handleRookClicked()
+                handleRookClicked(false)
             }
+			onDragStart={() =>
+				handleRookClicked(true)
+			}
         >
             <img src={rookImage} alt="rook" />
         </div>
@@ -71,4 +74,4 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
 
 }
 
-export default Rook
+export default Rook;
