@@ -1,11 +1,10 @@
-import Rook from '../pieces/rook/Rook.js'
-import Pawn from '../pieces/pawn/Pawn.js'
-import Queen from '../pieces/queen/Queen.js'
-import King from '../pieces/king/King.js'
-import Knight from '../pieces//knight/Knight.js'
-import Bishop from '../pieces/bishop/Bishop.js'
 import { useDrag, useDrop } from 'react-dnd';
-
+import Rook from '../pieces/rook/Rook.js';
+import Pawn from '../pieces/pawn/Pawn.js';
+import Queen from '../pieces/queen/Queen.js';
+import King from '../pieces/king/King.js';
+import Knight from '../pieces//knight/Knight.js';
+import Bishop from '../pieces/bishop/Bishop.js';
 
 const Piece = ({ nature, row, column, board, color, player, handleCellClicked }) => {
 
@@ -15,27 +14,34 @@ const Piece = ({ nature, row, column, board, color, player, handleCellClicked })
 	});
 
 	const [, drop] = useDrop({
-		accept: "object",
+		accept: 'object',
 		drop: () => handleCellClicked(row, column, [], false),
 		collect: (monitor) => ({
 			isOver: !!monitor.isOver(),
 		}),
 	});
 
-	switch(nature) {
-		case "rook": return (<div ref={(node) => drag(drop(node))}><Rook color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		case "pawn": return (<div ref={(node) => drag(drop(node))}><Pawn color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		case "queen": return (<div ref={(node) => drag(drop(node))}><Queen color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		case "king": return (<div ref={(node) => drag(drop(node))}><King color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		case "knight": return (<div ref={(node) => drag(drop(node))}><Knight color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		case "bishop": return (<div ref={(node) => drag(drop(node))}><Bishop color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} /></div>);
-		default:
-			return (
-				<div ref={drop} onClick={() => handleCellClicked(row, column, [], false)}>
+	const PieceComponent = {
+		rook: Rook,
+		pawn: Pawn,
+		queen: Queen,
+		king: King,
+		knight: Knight,
+		bishop: Bishop,
+	}[nature];
+
+	return (
+		<div ref={(node) => drag(drop(node))}>
+			{PieceComponent && (
+				<PieceComponent color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} />
+			)}
+			{!PieceComponent && (
+				<div style={{ width: '100%', height: '100%' }} ref={drop} onClick={() => handleCellClicked(row, column, [], false)}>
 					&nbsp;
 				</div>
-			);
-	}
-}
+			)}
+		</div>
+	);
+};
 
-export default Piece
+export default Piece;
