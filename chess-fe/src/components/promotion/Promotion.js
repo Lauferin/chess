@@ -1,4 +1,3 @@
-// import React, { useState } from "react";
 import "./Promotion.css";
 import whiteKnight from '../pieces/knight/white_knight.svg'
 import whiteBishop from '../pieces/bishop/white_bishop.svg'
@@ -9,10 +8,10 @@ import blackBishop from '../pieces/bishop/black_bishop.svg'
 import blackRook from '../pieces/rook/black_rook.svg'
 import blackQueen from '../pieces/queen/black_queen.svg'
 
-const Promotion = ({ setPawnToPromote, move, cellBoard, player }) => {
+const Promotion = ({ setPawnToPromote, move, row, column, player }) => {
 
 	const handleOptionClick = (promoteTo) => {
-		move(cellBoard, promoteTo);
+		move(row, column, promoteTo);
 		setPawnToPromote(null);
 	};
 	

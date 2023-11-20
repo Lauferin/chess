@@ -4,6 +4,11 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
+import axios from "axios";
+import { API_URL } from "../../constants";
+
+const PLAYER = true;
+const OPPONENT = false;
 
 const ChessBoard = ({ game, player }) => {
 
@@ -11,7 +16,7 @@ const ChessBoard = ({ game, player }) => {
 	const [picked, setPicked] = useState(null);
 	const [allowedMovements, setAllowedMovements] = useState([]);
 	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
-	// const [turn, setTurn] = useState(null);
+	const [turn, setTurn] = useState({"player": null, "piece": null, "movement": null, "promoted": null});
 	const opponent = player === "white" ? "black" : "white";
 	const colorRest = player === "white" ? 1 : 0;
 
@@ -47,9 +52,49 @@ const ChessBoard = ({ game, player }) => {
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
+		player === "white" ? setTurn({"player": PLAYER, "piece": null, "movement": null, "promoted": null})
+						   : setTurn({"player": OPPONENT, "piece": null, "movement": null, "promoted": null});
 	}, [game, player, opponent, colorRest]);
 
+	useEffect(() => {
+		console.log(turn)
+		if (turn.piece === null) {
+			return;
+		}
+		axios.post(API_URL, turn).then(() => {
+			console.log("mandado");
+		}); // salvarlo (y ver que hacer) si respondio 404
+		
+	}, [turn]);
+
+	useEffect(() => {
+		let interval;
+		const fetchData = async () => {
+			try {
+				const response = await fetch(API_URL);
+				const data = await response.json();
+				console.log('Data from webhook:', data);
+				// Process the data as needed
+			} catch (error) {
+				console.error('Error fetching data from webhook:', error);
+			}
+		};
+
+		if (turn.player === OPPONENT) {
+			fetchData();
+			interval = setInterval(() => {
+				fetchData();
+			}, 2000);
+	
+			return () => clearInterval(interval);
+		}
+
+	}, [turn]);
+
 	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
+		if (turn.player === OPPONENT) {
+			return;
+		}
 		console.log("row", rowIndex, "column", columnIndex)
 		const cellBoard = board[rowIndex][columnIndex]
 		if (picked) {  // If a cell was previously picked
@@ -80,7 +125,7 @@ const ChessBoard = ({ game, player }) => {
 						if (rowIndex === 0 && pickedCell.value === "pawn") { // a pawn has got to the edge
 							setPawnToPromote(columnIndex)
 						} else { // move!!!
-							move(cellBoard, null);
+							move(rowIndex, columnIndex, null);
 							return;
 						}
 					}
@@ -104,7 +149,8 @@ const ChessBoard = ({ game, player }) => {
 		setBoard([...board]); 
 	}
 
-	const move = (cellBoard, promoted) => {
+	const move = (row, column, promoted) => {
+		const cellBoard = board[row][column];
 		const { pickedRow, pickedColumn } = picked;
 		const pickedCell = board[pickedRow][pickedColumn];
 		cellBoard.value = promoted ? promoted : pickedCell.value
@@ -114,7 +160,8 @@ const ChessBoard = ({ game, player }) => {
 		setPicked(null)
 		setAllowedMovements([])
 		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color	
-		setBoard([...board]); 
+		setBoard([...board]);
+		setTurn({"player": OPPONENT, "piece": parse(pickedRow, pickedColumn), "movement": parse(row, column), "promoted": promoted});
 	}
 
 	const isCheckIfMoved = (row, column) => {
@@ -240,6 +287,12 @@ const ChessBoard = ({ game, player }) => {
 		return data.some(e => Array.isArray(e) && e.every((o, i) => Object.is(arr[i], o)));
 	}
 
+	const parse = (row, column) => {
+		const rowResult = player === "black" ? row + 1 : 8 - row; 
+		const columnResult = player === "white" ? String.fromCharCode(97 + column) : String.fromCharCode(97 + (7 - column));
+		return `${columnResult}${rowResult}`;
+	}
+
 	return (
 		<Fragment>
 		<div className="ChessBoard-board">
@@ -256,7 +309,7 @@ const ChessBoard = ({ game, player }) => {
 									// onClick={() => handleCellClicked(rowIndex, cellIndex)}
 								>
 									{pawnToPromote === cellIndex && rowIndex === 0 && 
-										<Promotion setPawnToPromote={setPawnToPromote} move={move} cellBoard={board[rowIndex][cellIndex]} player={player} />}
+										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} player={player} />}
 									<Piece 
 										nature={cell.value} row={rowIndex} column={cellIndex} board={board} color={cell.valueColor} player={player}
 										handleCellClicked={handleCellClicked} />

@@ -30,8 +30,7 @@ const Pawn = ({ row, column, board, color, player, handleCellClicked }) => {
 				handlePawnClicked(false)
 			}
 			onDragStart={() =>
-				{handlePawnClicked(true)
-				console.log("empezo")}
+				handlePawnClicked(true)
 			}
 		>
 			<img src={pawnImage} alt="pawn" />
