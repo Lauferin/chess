@@ -21,6 +21,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/movements/$', views.movements_list),
+    path('api/movements/', views.MovementListView.as_view(), name='movement-list'),
     re_path(r'^api/movements/([0-9]+)$', views.movements_detail),
 ]

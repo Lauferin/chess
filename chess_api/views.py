@@ -4,24 +4,15 @@ from rest_framework import status
 from django.http import JsonResponse
 from .models import Movement
 from .serializers import *
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics
 
 
-@api_view(['GET', 'POST'])
-def movements_list(request):
-    if request.method == 'GET':
-        data = Movement.objects.all()
-
-        serializer = MovementSerializer(data, context={'request': request}, many=True)
-
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        serializer = MovementSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MovementListView(generics.ListCreateAPIView):
+    queryset = Movement.objects.all()
+    serializer_class = MovementSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['player', 'movement', 'piece']
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
