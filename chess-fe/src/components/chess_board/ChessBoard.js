@@ -16,11 +16,14 @@ const ChessBoard = ({ game, player }) => {
 	const [picked, setPicked] = useState(null);
 	const [allowedMovements, setAllowedMovements] = useState([]);
 	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
-	const [turn, setTurn] = useState({"player": null, "piece": null, "movement": null, "promoted": null});
+	const [turn, setTurn] = useState(null);
 	const opponent = player === "white" ? "black" : "white";
 	const colorRest = player === "white" ? 1 : 0;
 
 	useEffect(() => {
+		if (player === null) {
+			return;
+		}
 		const generateBoardChess = () => {
 			let pieces = [
 				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
@@ -52,20 +55,20 @@ const ChessBoard = ({ game, player }) => {
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
-		player === "white" ? setTurn({"player": PLAYER, "piece": null, "movement": null, "promoted": null})
-						   : setTurn({"player": OPPONENT, "piece": null, "movement": null, "promoted": null});
+		player === "white" ? setTurn(PLAYER) : setTurn(OPPONENT);
 	}, [game, player, opponent, colorRest]);
 
-	useEffect(() => {
+	const sendMovement = (piece, movement, promoted) => {
 		console.log(turn)
-		if (turn.piece === null) {
-			return;
+		const data = {"game": game, "player": PLAYER, "piece": piece, "movement": movement, "promoted": promoted}
+		try {
+			axios.post(API_URL, data).then(() => {
+				console.log("movimiento mandado");
+			});
+		} catch (error) {
+			console.log("server unavailable or bad request", error)
 		}
-		axios.post(API_URL, turn).then(() => {
-			console.log("mandado");
-		}); // salvarlo (y ver que hacer) si respondio 404
-		
-	}, [turn]);
+	}
 
 	useEffect(() => {
 		let interval;
@@ -80,7 +83,7 @@ const ChessBoard = ({ game, player }) => {
 			}
 		};
 
-		if (turn.player === OPPONENT) {
+		if (turn === OPPONENT) {
 			fetchData();
 			interval = setInterval(() => {
 				fetchData();
@@ -88,11 +91,10 @@ const ChessBoard = ({ game, player }) => {
 	
 			return () => clearInterval(interval);
 		}
-
 	}, [turn]);
 
 	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
-		if (turn.player === OPPONENT) {
+		if (turn === OPPONENT) {
 			return;
 		}
 		console.log("row", rowIndex, "column", columnIndex)
@@ -161,7 +163,8 @@ const ChessBoard = ({ game, player }) => {
 		setAllowedMovements([])
 		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color	
 		setBoard([...board]);
-		setTurn({"player": OPPONENT, "piece": parse(pickedRow, pickedColumn), "movement": parse(row, column), "promoted": promoted});
+		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
+		setTurn(OPPONENT);
 	}
 
 	const isCheckIfMoved = (row, column) => {

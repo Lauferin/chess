@@ -2,10 +2,15 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from django.http import JsonResponse
-from .models import Movement
+from .models import Game, Movement
 from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
+
+
+class GameListView(generics.ListCreateAPIView):
+    queryset = Game.objects.all()
+    serializer_class = GameSerializer
 
 
 class MovementListView(generics.ListCreateAPIView):
