@@ -18,23 +18,19 @@ class MovementListView(generics.ListCreateAPIView):
     queryset = Movement.objects.all()
     serializer_class = MovementSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['player', 'movement', 'piece']
+    filterset_fields = ['player', 'movement', 'piece', 'game']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        pk_gt = self.request.query_params.get('pk__gt')
+        if pk_gt is not None:
+            queryset = queryset.filter(pk__gt=pk_gt)
+        return queryset
+        
     def perform_create(self, serializer):
-        # Save the movement
-        print("hi")
         serializer.save()
-
-        # Get the movement instance
-        print("hii")
         movement_instance = serializer.instance
-
-        # Trigger asynchronous processing
-        print("hiii")
         process_movement_async.delay(movement_instance.id)
-
-        # Respond with success
-        print("hiiii")
         return Response(serializer.data)
 
 

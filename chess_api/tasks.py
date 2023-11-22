@@ -13,7 +13,7 @@ def process_movement_async(movement_id):
     # Perform additional operations or save a new movement if needed
     new_movement = Movement.objects.create(
         game=movement.game,
-        player=movement.player,
+        player=False,
         piece="g7",
         movement="g5",
         promoted=movement.promoted

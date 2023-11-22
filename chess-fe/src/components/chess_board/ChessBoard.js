@@ -17,6 +17,7 @@ const ChessBoard = ({ game, player }) => {
 	const [allowedMovements, setAllowedMovements] = useState([]);
 	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
 	const [turn, setTurn] = useState(null);
+	const [lastMovement, setLastMovement] = useState(null);
 	const opponent = player === "white" ? "black" : "white";
 	const colorRest = player === "white" ? 1 : 0;
 
@@ -232,11 +233,12 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
-		console.log(turn)
+		console.log("turn", turn, "game", game)
 		const data = {"game": game, "player": PLAYER, "piece": piece, "movement": movement, "promoted": promoted}
 		try {
-			axios.post(API_URL, data).then(() => {
-				console.log("movimiento mandado");
+			axios.post(API_URL, data).then(response => {
+				console.log("movimiento mandado", response.data.pk);
+				setLastMovement(response.data.pk)
 			});
 		} catch (error) {
 			console.log("server unavailable or bad request", error)
@@ -297,16 +299,19 @@ const ChessBoard = ({ game, player }) => {
 		let interval;
 		const fetchData = async () => {
 			try {
-				const response = await fetch(API_URL);
+				const response = await fetch(`${API_URL}?player=False&game=${game}&pk__gt=${lastMovement}`);
 				const data = await response.json();
 				console.log('Data from webhook:', data);
-				moveOpponent(data[18]);
+				if (data.length) {
+					setLastMovement(null)
+					moveOpponent(data[0]);
+				}
 			} catch (error) {
 				console.error('Error fetching data from webhook:', error);
 			}
 		};
 
-		if (turn === OPPONENT) {
+		if (lastMovement !== null) {
 			fetchData();
 			interval = setInterval(() => {
 				fetchData();
@@ -316,7 +321,7 @@ const ChessBoard = ({ game, player }) => {
 		}
 		// the following line is not exactly a comment, it disables the warning of not adding the function moveOpponent. Don't remove.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [turn]);
+	}, [lastMovement]);
 
 	return (
 		<Fragment>
