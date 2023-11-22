@@ -20,43 +20,6 @@ const ChessBoard = ({ game, player }) => {
 	const opponent = player === "white" ? "black" : "white";
 	const colorRest = player === "white" ? 1 : 0;
 
-	useEffect(() => {
-		if (player === null) {
-			return;
-		}
-		const generateBoardChess = () => {
-			let pieces = [
-				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
-				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
-				[null, null, null, null, null, null, null, null],
-				[null, null, null, null, null, null, null, null],
-				[null, null, null, null, null, null, null, null],
-				[null, null, null, null, null, null, null, null],
-				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
-				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
-			]
-			const newMatrix = [];
-			// let lastColor = 1 HACELO CON BINARIO
-			for (let i = 0; i < 8; ++i) {
-				const row = [];
-				for (let j = 0; j < 8; ++j) {
-					const cellColor = (i + j) % 2 === colorRest ? 'white' : 'gray';
-					row.push(
-						{
-							cellColor: cellColor,
-							value: pieces[i][j],
-							valueColor: i < 2 ? opponent : (i > 5 ? player : null)
-						}
-					);
-				}
-				newMatrix.push(row);
-			}
-			// newMatrix[4][0].valueColor = 'white'
-			return newMatrix;
-		};
-		setBoard(generateBoardChess());
-		player === "white" ? setTurn(PLAYER) : setTurn(OPPONENT);
-	}, [game, player, opponent, colorRest]);
 
 	const sendMovement = (piece, movement, promoted) => {
 		console.log(turn)
@@ -69,29 +32,6 @@ const ChessBoard = ({ game, player }) => {
 			console.log("server unavailable or bad request", error)
 		}
 	}
-
-	useEffect(() => {
-		let interval;
-		const fetchData = async () => {
-			try {
-				const response = await fetch(API_URL);
-				const data = await response.json();
-				console.log('Data from webhook:', data);
-				// Process the data as needed
-			} catch (error) {
-				console.error('Error fetching data from webhook:', error);
-			}
-		};
-
-		if (turn === OPPONENT) {
-			fetchData();
-			interval = setInterval(() => {
-				fetchData();
-			}, 2000);
-	
-			return () => clearInterval(interval);
-		}
-	}, [turn]);
 
 	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
 		if (turn === OPPONENT) {
@@ -165,6 +105,19 @@ const ChessBoard = ({ game, player }) => {
 		setBoard([...board]);
 		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
 		setTurn(OPPONENT);
+	}
+
+	const moveOpponent = (data) => {
+		const piece = unParse(data.piece);
+		const movement = unParse(data.movement);
+		const pickedCell = board[piece.row][piece.column]
+		const movementCell = board[movement.row][movement.column];
+		movementCell.value = data.promoted ? data.promoted : pickedCell.value
+		movementCell.valueColor = pickedCell.valueColor
+		pickedCell.value = null
+		pickedCell.valueColor = null
+		setBoard([...board]);
+		setTurn(PLAYER);
 	}
 
 	const isCheckIfMoved = (row, column) => {
@@ -291,10 +244,79 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const parse = (row, column) => {
-		const rowResult = player === "black" ? row + 1 : 8 - row; 
 		const columnResult = player === "white" ? String.fromCharCode(97 + column) : String.fromCharCode(97 + (7 - column));
+		const rowResult = player === "black" ? row + 1 : 8 - row; 
 		return `${columnResult}${rowResult}`;
 	}
+
+	const unParse = (position) => {
+		const columnResult = player === "white" ? position.charCodeAt(0) - 97 : 7 - position.charCodeAt(0) + 97;
+		const rowResult = player === "black" ? position[1] - 1 : 8 - position[1]; 
+		return {"row": rowResult, "column": columnResult};
+	}
+
+	useEffect(() => {
+		if (player === null) {
+			return;
+		}
+		const generateBoardChess = () => {
+			let pieces = [
+				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
+				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
+				[null, null, null, null, null, null, null, null],
+				[null, null, null, null, null, null, null, null],
+				[null, null, null, null, null, null, null, null],
+				[null, null, null, null, null, null, null, null],
+				['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
+				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
+			]
+			const newMatrix = [];
+			// let lastColor = 1 HACELO CON BINARIO
+			for (let i = 0; i < 8; ++i) {
+				const row = [];
+				for (let j = 0; j < 8; ++j) {
+					const cellColor = (i + j) % 2 === colorRest ? 'white' : 'gray';
+					row.push(
+						{
+							cellColor: cellColor,
+							value: pieces[i][j],
+							valueColor: i < 2 ? opponent : (i > 5 ? player : null)
+						}
+					);
+				}
+				newMatrix.push(row);
+			}
+			// newMatrix[4][0].valueColor = 'white'
+			return newMatrix;
+		};
+		setBoard(generateBoardChess());
+		player === "white" ? setTurn(PLAYER) : setTurn(OPPONENT);
+	}, [game, player, opponent, colorRest]);
+
+	useEffect(() => {
+		let interval;
+		const fetchData = async () => {
+			try {
+				const response = await fetch(API_URL);
+				const data = await response.json();
+				console.log('Data from webhook:', data);
+				moveOpponent(data[18]);
+			} catch (error) {
+				console.error('Error fetching data from webhook:', error);
+			}
+		};
+
+		if (turn === OPPONENT) {
+			fetchData();
+			interval = setInterval(() => {
+				fetchData();
+			}, 2000);
+	
+			return () => clearInterval(interval);
+		}
+		// the following line is not exactly a comment, it disables the warning of not adding the function moveOpponent. Don't remove.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [turn]);
 
 	return (
 		<Fragment>
