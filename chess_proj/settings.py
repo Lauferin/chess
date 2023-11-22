@@ -57,6 +57,10 @@ MIDDLEWARE = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 
+# Celery Configuration
+CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost//'
+CELERY_RESULT_BACKEND = 'rpc://'
+
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }

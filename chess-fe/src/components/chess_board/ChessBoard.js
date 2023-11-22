@@ -21,18 +21,6 @@ const ChessBoard = ({ game, player }) => {
 	const colorRest = player === "white" ? 1 : 0;
 
 
-	const sendMovement = (piece, movement, promoted) => {
-		console.log(turn)
-		const data = {"game": game, "player": PLAYER, "piece": piece, "movement": movement, "promoted": promoted}
-		try {
-			axios.post(API_URL, data).then(() => {
-				console.log("movimiento mandado");
-			});
-		} catch (error) {
-			console.log("server unavailable or bad request", error)
-		}
-	}
-
 	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
 		if (turn === OPPONENT) {
 			return;
@@ -89,35 +77,6 @@ const ChessBoard = ({ game, player }) => {
 			}
 		}
 		setBoard([...board]); 
-	}
-
-	const move = (row, column, promoted) => {
-		const cellBoard = board[row][column];
-		const { pickedRow, pickedColumn } = picked;
-		const pickedCell = board[pickedRow][pickedColumn];
-		cellBoard.value = promoted ? promoted : pickedCell.value
-		cellBoard.valueColor = pickedCell.valueColor
-		pickedCell.value = null
-		pickedCell.valueColor = null
-		setPicked(null)
-		setAllowedMovements([])
-		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color	
-		setBoard([...board]);
-		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
-		setTurn(OPPONENT);
-	}
-
-	const moveOpponent = (data) => {
-		const piece = unParse(data.piece);
-		const movement = unParse(data.movement);
-		const pickedCell = board[piece.row][piece.column]
-		const movementCell = board[movement.row][movement.column];
-		movementCell.value = data.promoted ? data.promoted : pickedCell.value
-		movementCell.valueColor = pickedCell.valueColor
-		pickedCell.value = null
-		pickedCell.valueColor = null
-		setBoard([...board]);
-		setTurn(PLAYER);
 	}
 
 	const isCheckIfMoved = (row, column) => {
@@ -241,6 +200,47 @@ const ChessBoard = ({ game, player }) => {
 
 	const includesArray = (data, arr) => { // function that checks if array is instead of array. Regular .includes doesn't work because it's another object.
 		return data.some(e => Array.isArray(e) && e.every((o, i) => Object.is(arr[i], o)));
+	}
+
+	const move = (row, column, promoted) => {
+		const cellBoard = board[row][column];
+		const { pickedRow, pickedColumn } = picked;
+		const pickedCell = board[pickedRow][pickedColumn];
+		cellBoard.value = promoted ? promoted : pickedCell.value
+		cellBoard.valueColor = pickedCell.valueColor
+		pickedCell.value = null
+		pickedCell.valueColor = null
+		setPicked(null)
+		setAllowedMovements([])
+		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color	
+		setBoard([...board]);
+		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
+		setTurn(OPPONENT);
+	}
+
+	const moveOpponent = (data) => {
+		const piece = unParse(data.piece);
+		const movement = unParse(data.movement);
+		const pickedCell = board[piece.row][piece.column]
+		const movementCell = board[movement.row][movement.column];
+		movementCell.value = data.promoted ? data.promoted : pickedCell.value
+		movementCell.valueColor = pickedCell.valueColor
+		pickedCell.value = null
+		pickedCell.valueColor = null
+		setBoard([...board]);
+		setTurn(PLAYER);
+	}
+
+	const sendMovement = (piece, movement, promoted) => {
+		console.log(turn)
+		const data = {"game": game, "player": PLAYER, "piece": piece, "movement": movement, "promoted": promoted}
+		try {
+			axios.post(API_URL, data).then(() => {
+				console.log("movimiento mandado");
+			});
+		} catch (error) {
+			console.log("server unavailable or bad request", error)
+		}
 	}
 
 	const parse = (row, column) => {

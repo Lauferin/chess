@@ -5,7 +5,7 @@ from .models import Game, Movement
 class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Game 
+        model = Game
         fields = ('pk', ) # the comma is important
 
 
@@ -13,7 +13,7 @@ class MovementSerializer(serializers.ModelSerializer):
     game = serializers.PrimaryKeyRelatedField(queryset=Game.objects.all())
 
     class Meta:
-        model = Movement 
+        model = Movement
         fields = ('pk', 'game', 'player', 'piece', 'movement', 'promoted')
         
     # def create(self, validated_data):
