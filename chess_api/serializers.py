@@ -6,7 +6,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('pk', ) # the comma is important
+        fields = ('pk', 'player_color')
 
 
 class MovementSerializer(serializers.ModelSerializer):

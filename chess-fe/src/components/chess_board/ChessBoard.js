@@ -233,8 +233,9 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
-		console.log("turn", turn, "game", game)
-		const data = {"game": game, "player": PLAYER, "piece": piece, "movement": movement, "promoted": promoted}
+		console.log("turn", turn, "game", game, "player", player)
+		const playerBoolean = player === "white" ? true : false
+		const data = {"game": game, "player": playerBoolean, "piece": piece, "movement": movement, "promoted": promoted}
 		try {
 			axios.post(API_URL, data).then(response => {
 				console.log("movimiento mandado", response.data.pk);
@@ -292,14 +293,20 @@ const ChessBoard = ({ game, player }) => {
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
-		player === "white" ? setTurn(PLAYER) : setTurn(OPPONENT);
+		if (player === "white") {
+			setTurn(PLAYER);
+		} else {
+			setTurn(OPPONENT);
+			setLastMovement(0) // not null, so it asks for opponent's movement
+		}
 	}, [game, player, opponent, colorRest]);
 
 	useEffect(() => {
 		let interval;
 		const fetchData = async () => {
 			try {
-				const response = await fetch(`${API_URL}?player=False&game=${game}&pk__gt=${lastMovement}`);
+				const opponentBoolean = opponent === "white" ? "True" : "False"
+				const response = await fetch(`${API_URL}?player=${opponentBoolean}&game=${game}&pk__gt=${lastMovement}`);
 				const data = await response.json();
 				console.log('Data from webhook:', data);
 				if (data.length) {

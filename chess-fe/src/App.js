@@ -10,8 +10,9 @@ const App = () => {
 	const [player, setPlayer] = useState(null);
 
 	const startGame = (color) => {
+		const data = {"player_color": color === "white"}
 		try {
-			axios.post("http://localhost:8000/api/games/").then((response) => {
+			axios.post("http://localhost:8000/api/games/", data).then((response) => {
 				console.log("new game request accepted", response);
 				setPlayer(color);
 				setGame(response.data.pk)

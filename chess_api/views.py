@@ -13,6 +13,14 @@ class GameListView(generics.ListCreateAPIView):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
 
+    def perform_create(self, serializer):
+        serializer.save()
+        movement_instance = serializer.instance
+        if movement_instance.player_color == False: # the user is black, we're white
+            print("ENTERING")
+            process_movement_async.delay(game_id=movement_instance.id)
+        return Response(serializer.data)
+
 
 class MovementListView(generics.ListCreateAPIView):
     queryset = Movement.objects.all()
@@ -30,7 +38,7 @@ class MovementListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
         movement_instance = serializer.instance
-        process_movement_async.delay(movement_instance.id)
+        process_movement_async.delay(movement_id=movement_instance.id)
         return Response(serializer.data)
 
 

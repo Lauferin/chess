@@ -2,7 +2,8 @@ from django.db import models
 
 
 class Game(models.Model):
-    pass
+    player_color = models.BooleanField("Player color", choices=[(True, 'Black'), (False, 'White')])
+
     # def __str__(self):
     #     return self.pk
 
