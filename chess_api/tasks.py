@@ -43,16 +43,16 @@ def process_movement_async(movement_id=None, game_id=None):
     for row_index, row in enumerate(board):
         for col_index, piece in enumerate(row):
             if piece is not None:
-                piece.change_position(parse(row_index, col_index, player))
+                piece.change_position(row_index, col_index)
                 pieces.append(piece) 
 
     for movement in movements_array:
         pieceColumn, pieceRow = unParse(movement[0], player)
         movementColumn, movementRow = unParse(movement[1], player)
         if board[movementRow][movementColumn] is None:
-            pieces = [piece for piece in pieces if piece.get_position() != movement[1]]
+            pieces = [piece for piece in pieces if piece.get_position() != (movementRow, movementColumn)]
         board[movementRow][movementColumn] = board[pieceRow][pieceColumn]
-        board[movementRow][movementColumn].change_position(movement[1])
+        board[movementRow][movementColumn].change_position(movementRow, movementColumn)
         board[pieceRow][pieceColumn] = None
 
     board_state = [[piece.get_name() if piece is not None else "" for piece in row] for row in board]
@@ -63,7 +63,7 @@ def process_movement_async(movement_id=None, game_id=None):
     allowed_movements = []
     player_pieces = [piece for piece in pieces if piece.get_color() == player]
     for piece in player_pieces:
-        allowed_movements += [(piece.get_position(), movement) for movement in piece.get_allowed_movements(board)]
+        allowed_movements += [(parse(*piece.get_position(), player), movement) for movement in piece.get_allowed_movements(board)] # * unpacks from tuple
 
     print(allowed_movements)
     selected_movement = random.choice(allowed_movements)

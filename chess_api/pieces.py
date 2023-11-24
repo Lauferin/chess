@@ -7,10 +7,11 @@ class Piece(object):
         return self._name
     
     def get_position(self):
-        return self._position
+        return self._row, self._col
 
-    def change_position(self, position):
-        self._position = position
+    def change_position(self, row, col):
+        self._row = row
+        self._col = col
 
     def get_color(self):
         return self._color
