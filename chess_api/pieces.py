@@ -23,6 +23,8 @@ class Piece(object):
 class Pawn(Piece):
     _name = "Pawn"
 
+    promotions = ["knight", "bishop", "rook", "queen"]
+
     def __init__(self, color):
         super().__init__(color)
         self._passant = False
@@ -34,14 +36,23 @@ class Pawn(Piece):
     def get_allowed_movements(self, board, player):
         row, col = self._row, self._col
         allowed_movements = []
-        if board[row + 1][col] == None:
+        if row == 6:
+            if board[row + 1][col] == None:
+                allowed_movements.extend([(row + 1, col, promotion) for promotion in self.promotions])
+        elif board[row + 1][col] == None:
             allowed_movements.append((row + 1, col))
             if row == 1 and board[row + 2][col] == None:
                 allowed_movements.append((row + 2, col))
         if col > 0 and board[row + 1][col - 1] is not None and board[row + 1][col - 1].get_color() != player:
-            allowed_movements.append((row + 1, col - 1))
+            if row == 6:
+                allowed_movements.extend([(row + 1, col - 1, promotion) for promotion in self.promotions])
+            else:
+                allowed_movements.append((row + 1, col - 1))
         if col < 7 and board[row + 1][col + 1] is not None and board[row + 1][col + 1].get_color() != player:
-            allowed_movements.append((row + 1, col + 1))
+            if row == 6:
+                allowed_movements.extend([(row + 1, col + 1, promotion) for promotion in self.promotions])
+            else:
+                allowed_movements.append((row + 1, col + 1))
         # add rule of crazy pawn
 
         return allowed_movements
@@ -55,7 +66,7 @@ class Knight(Piece):
         allowed_movements = []
 
         if row > 0: # one forward, two right and left
-            if col < 6 and (board[row - 1][col + 1] is None or board[row - 1][col + 1].get_color() != player):
+            if col < 6 and (board[row - 1][col + 2] is None or board[row - 1][col + 1].get_color() != player):
                 allowed_movements.append([row - 1, col + 2])
             if col > 1 and (board[row - 1][col - 1] is None or board[row - 1][col - 1].get_color() != player):
                 allowed_movements.append([row - 1, col - 2])

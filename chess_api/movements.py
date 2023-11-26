@@ -8,8 +8,9 @@ def get_movement(board, pieces, player, algorithm):
         allowed_movements = []
         player_pieces = [piece for piece in pieces if piece.get_color() == player]
         for piece in player_pieces:
-            allowed_movements += [(parse(*piece.get_position(), player), parse(*movement, player)) # * unpacks from tuple
-                                for movement in piece.get_allowed_movements(board, player)] 
+            allowed_movements += [(parse(*piece.get_position(), player), parse(movement[0], movement[1], player), movement[2]) if len(movement) == 3
+                                    else (parse(*piece.get_position(), player), parse(movement[0], movement[1], player))
+                                    for movement in piece.get_allowed_movements(board, player)]
 
         print(allowed_movements)
         selected_movement = random.choice(allowed_movements)
@@ -20,7 +21,7 @@ def get_movement(board, pieces, player, algorithm):
             "state": "ok", # or checkmate, or others
             "piece": selected_movement[0],
             "movement": selected_movement[1],
-            "promoted": None
+            "promoted": selected_movement[2] if len(selected_movement) == 3 else None
         }
 
         return movement
@@ -34,9 +35,9 @@ def get_movement(board, pieces, player, algorithm):
         return "This is case 3"
 
 
-    switch_dict = {
+    algorithms = {
         "basic2": basic2,
         "basic3": basic3
     }
 
-    return switch_dict.get(algorithm, basic)()
+    return algorithms.get(algorithm, basic)()
