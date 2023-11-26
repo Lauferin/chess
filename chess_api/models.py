@@ -3,6 +3,7 @@ from django.db import models
 
 class Game(models.Model):
     player_color = models.BooleanField("Player color", choices=[(True, 'Black'), (False, 'White')])
+    opponent = models.CharField("Opponent", max_length=20, default="basic")
 
     # def __str__(self):
     #     return self.pk

@@ -6,7 +6,7 @@ class GameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('pk', 'player_color')
+        fields = ('pk', 'player_color', 'opponent')
 
 
 class MovementSerializer(serializers.ModelSerializer):

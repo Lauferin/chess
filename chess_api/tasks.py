@@ -3,6 +3,7 @@ from time import sleep
 from .models import Movement, Game
 from .pieces import Rook, Knight, Bishop, King, Queen, Pawn
 from .util import parse, unParse
+from .constants import WHITE, BLACK
 import random
 
 @shared_task
@@ -10,8 +11,6 @@ def process_movement_async(movement_id=None, game_id=None):
     print("SCRUPUS")
     # Simulate some asynchronous processing
     sleep(1)  # Replace with your actual asynchronous processing logic
-    BLACK = False
-    WHITE = True
     player = None
     movements_array = []
 
@@ -27,17 +26,16 @@ def process_movement_async(movement_id=None, game_id=None):
     else: # we received game_id
         player = WHITE
         game = Game.objects.get(pk=game_id)
-    opponent = BLACK if player == WHITE else WHITE
 
     board = [
-        [Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK)],
         [Rook(BLACK), Knight(BLACK), Bishop(BLACK), King(BLACK), Queen(BLACK), Bishop(BLACK), Knight(BLACK), Rook(BLACK)],
+        [Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK), Pawn(BLACK)],
         [None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None],
-        [Rook(WHITE), Knight(WHITE), Bishop(WHITE), King(WHITE), Queen(WHITE), Bishop(WHITE), Knight(WHITE), Rook(WHITE)],
         [Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE), Pawn(WHITE)],
+        [Rook(WHITE), Knight(WHITE), Bishop(WHITE), King(WHITE), Queen(WHITE), Bishop(WHITE), Knight(WHITE), Rook(WHITE)],
     ]
     pieces = []
     for row_index, row in enumerate(board):
@@ -46,10 +44,11 @@ def process_movement_async(movement_id=None, game_id=None):
                 piece.change_position(row_index, col_index)
                 pieces.append(piece) 
 
+    # from celery.contrib import rdb;rdb.set_trace()
     for movement in movements_array:
         pieceColumn, pieceRow = unParse(movement[0], player)
         movementColumn, movementRow = unParse(movement[1], player)
-        if board[movementRow][movementColumn] is None:
+        if board[movementRow][movementColumn] is not None:
             pieces = [piece for piece in pieces if piece.get_position() != (movementRow, movementColumn)]
         board[movementRow][movementColumn] = board[pieceRow][pieceColumn]
         board[movementRow][movementColumn].change_position(movementRow, movementColumn)
@@ -63,12 +62,13 @@ def process_movement_async(movement_id=None, game_id=None):
     allowed_movements = []
     player_pieces = [piece for piece in pieces if piece.get_color() == player]
     for piece in player_pieces:
-        allowed_movements += [(parse(*piece.get_position(), player), movement) for movement in piece.get_allowed_movements(board)] # * unpacks from tuple
+        allowed_movements += [(parse(*piece.get_position(), player), parse(*movement, player)) # * unpacks from tuple
+                            for movement in piece.get_allowed_movements(board, player)] 
 
     print(allowed_movements)
     selected_movement = random.choice(allowed_movements)
+    print(selected_movement)
 
-    # from celery.contrib import rdb;rdb.set_trace()
 
     # if not game is over
     new_movement = Movement.objects.create(
