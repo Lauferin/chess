@@ -14,7 +14,6 @@ def get_movement(board, pieces, player, algorithm):
 
         print(allowed_movements)
         selected_movement = random.choice(allowed_movements)
-        print(len(selected_movement))
         print(selected_movement)
 
         movement = {

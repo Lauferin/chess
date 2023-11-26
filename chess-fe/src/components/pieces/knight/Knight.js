@@ -9,7 +9,7 @@ const Knight = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (column < 6 && board[row - 1][column + 2].valueColor !== player) {
 				allowedMovements.push([row - 1, column + 2])
 			}
-			if (column > 1 && board[row - 1][column - 1].valueColor !== player) {
+			if (column > 1 && board[row - 1][column - 2].valueColor !== player) {
 				allowedMovements.push([row - 1, column - 2])
 			}
 			if (row > 1) { // two forward, right and left

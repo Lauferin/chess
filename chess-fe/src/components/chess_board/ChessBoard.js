@@ -289,7 +289,6 @@ const ChessBoard = ({ game, player }) => {
 				}
 				newMatrix.push(row);
 			}
-			// newMatrix[4][0].valueColor = 'white'
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
