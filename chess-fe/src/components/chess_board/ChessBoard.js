@@ -18,7 +18,7 @@ const ChessBoard = ({ game, playerColor }) => {
 	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
 	const [turn, setTurn] = useState(null);
 	const [lastMovement, setLastMovement] = useState(null);
-	// const [recentlyMoved, setRecentlyMoved] = useState(null)
+	const [recentlyMoved, setRecentlyMoved] = useState([])
 	const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 
 
@@ -203,18 +203,26 @@ const ChessBoard = ({ game, playerColor }) => {
 		return data.some(e => Array.isArray(e) && e.every((o, i) => Object.is(arr[i], o)));
 	}
 
+	const paintRecentlyMoved = (pickedRow, pickedColumn, movementRow, movementColumn) => {
+		recentlyMoved.forEach(cell => {
+			board[cell.row][cell.column].cellColor = !!((cell.row + cell.column) % 2) === playerColor ? 'white' : 'gray'; // reset color
+		})
+		board[pickedRow][pickedColumn].cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'yellow' : 'yellowgreen'; // paint recently color
+		board[movementRow][movementColumn].cellColor = !!((movementRow + movementColumn) % 2) === playerColor ? 'yellow' : 'yellowgreen'; // paint recent color
+		setRecentlyMoved([{"row": pickedRow, "column": pickedColumn}, {"row": movementRow, "column": movementColumn}]);
+	}
+
 	const move = (row, column, promoted) => {
 		const cellBoard = board[row][column];
 		const { pickedRow, pickedColumn } = picked;
 		const pickedCell = board[pickedRow][pickedColumn];
-		cellBoard.value = promoted ? promoted : pickedCell.value
-		cellBoard.valueColor = pickedCell.valueColor
-		pickedCell.value = null
-		pickedCell.valueColor = null
-		setPicked(null)
-		setAllowedMovements([])
-		// setRecentlyMoved(pickedRow, pickedColumn, row, column)
-		pickedCell.cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'white' : 'gray'; // reset its color	
+		cellBoard.value = promoted ? promoted : pickedCell.value;
+		cellBoard.valueColor = pickedCell.valueColor;
+		pickedCell.value = null;
+		pickedCell.valueColor = null;
+		setPicked(null);
+		setAllowedMovements([]);
+		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
 		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
 		setTurn(OPPONENT);
@@ -223,12 +231,13 @@ const ChessBoard = ({ game, playerColor }) => {
 	const moveOpponent = (data) => {
 		const piece = unParse(data.piece);
 		const movement = unParse(data.movement);
-		const pickedCell = board[piece.row][piece.column]
+		const pickedCell = board[piece.row][piece.column];
 		const movementCell = board[movement.row][movement.column];
-		movementCell.value = data.promoted ? data.promoted : pickedCell.value
-		movementCell.valueColor = pickedCell.valueColor
-		pickedCell.value = null
-		pickedCell.valueColor = null
+		movementCell.value = data.promoted ? data.promoted : pickedCell.value;
+		movementCell.valueColor = pickedCell.valueColor;
+		pickedCell.value = null;
+		pickedCell.valueColor = null;
+		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
 		setBoard([...board]);
 		setTurn(PLAYER);
 	}
@@ -340,7 +349,6 @@ const ChessBoard = ({ game, playerColor }) => {
 									key={cellIndex}
 									className="ChessBoard-cell"
 									style={{ backgroundColor: cell.cellColor}}
-									// onClick={() => handleCellClicked(rowIndex, cellIndex)}
 								>
 									{pawnToPromote === cellIndex && rowIndex === 0 && 
 										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} playerColor={playerColor} />}
