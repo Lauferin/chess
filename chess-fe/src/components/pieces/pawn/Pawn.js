@@ -1,11 +1,12 @@
+import { BLACK, WHITE } from '../../../constants';
 import blackPawn from './black_pawn.svg';
 import whitePawn from './white_pawn.svg';
 
 
-const Pawn = ({ row, column, board, color, player, handleCellClicked }) => {
+const Pawn = ({ row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
 	const handlePawnClicked = (dragging) => {
-		const opponent = player === "white" ? "black" : "white";
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 		const allowedMovements = [];
 		if (board[row - 1][column].value === null) {
 			allowedMovements.push([row - 1, column]);
@@ -13,17 +14,17 @@ const Pawn = ({ row, column, board, color, player, handleCellClicked }) => {
 				allowedMovements.push([row - 2, column]);
 			}
 		}
-		if (column > 0 && board[row - 1][column - 1].valueColor === opponent ) {
+		if (column > 0 && board[row - 1][column - 1].valueColor === opponentColor ) {
 			allowedMovements.push([row - 1, column - 1]);
 		}
-		if (column < 7 && board[row - 1][column + 1].valueColor === opponent ) {
+		if (column < 7 && board[row - 1][column + 1].valueColor === opponentColor ) {
 			allowedMovements.push([row - 1, column + 1]);
 		}
 		// add rule of crazy pawn
 		handleCellClicked(row, column, allowedMovements, dragging);
 	}
 
-	const pawnImage = color === 'white' ? whitePawn : blackPawn 
+	const pawnImage = pieceColor === WHITE ? whitePawn : blackPawn 
 	return (
 		<div 
 			onClick={() =>

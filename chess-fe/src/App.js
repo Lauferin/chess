@@ -3,18 +3,19 @@ import "./App.css";
 import axios from "axios";
 import Header from "./components/Header";
 import ChessBoard from './components/chess_board/ChessBoard';
+import { WHITE, GAMES_URL } from "./constants";
 
 const App = () => {
 
 	const [game, setGame] = useState(null);
-	const [player, setPlayer] = useState(null);
+	const [playerColor, setPlayerColor] = useState(null);
 
 	const startGame = (color) => {
-		const data = {"player_color": color === "white", "opponent": "basic"}
+		const data = {"player_color": color, "opponent": "basic"}
 		try {
-			axios.post("http://localhost:8000/api/games/", data).then((response) => {
+			axios.post(GAMES_URL, data).then((response) => {
 				console.log("new game request accepted", response);
-				setPlayer(color);
+				setPlayerColor(color);
 				setGame(response.data.pk)
 			});
 		} catch (error) {
@@ -23,13 +24,13 @@ const App = () => {
 	}
 
 	useEffect(() => {
-		startGame("white");
+		startGame(WHITE);
 	}, []);
 
 	return (
 		<div className="App">
 			<Header startGame={startGame} />
-			<ChessBoard game={game} player={player} />
+			<ChessBoard game={game} playerColor={playerColor} />
 		</div>
 	);
 }

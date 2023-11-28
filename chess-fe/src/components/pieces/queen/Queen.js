@@ -1,10 +1,11 @@
+import { BLACK, WHITE } from '../../../constants';
 import blackQueen from './black_queen.svg'
 import whiteQueen from './white_queen.svg'
 
-const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
+const Queen = ({ row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
 	const handleQueenClicked = (dragging) => {
-		const opponent = player === "white" ? "black" : "white";
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 		const allowedMovements = [];
 
 		// bishop movements
@@ -14,7 +15,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -26,7 +27,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -38,7 +39,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -50,7 +51,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -64,7 +65,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[row][i].value === null) {
 				allowedMovements.push([row, i])
 			} else {
-				if (board[row][i].valueColor === opponent) {
+				if (board[row][i].valueColor === opponentColor) {
 					allowedMovements.push([row, i])
 				}
 				break;
@@ -76,7 +77,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[row][i].value === null) {
 				allowedMovements.push([row, i])
 			} else {
-				if (board[row][i].valueColor === opponent) {
+				if (board[row][i].valueColor === opponentColor) {
 					allowedMovements.push([row, i])
 				}
 				break;
@@ -88,7 +89,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][column].value === null) {
 				allowedMovements.push([i, column])
 			} else {
-				if (board[i][column].valueColor === opponent) {
+				if (board[i][column].valueColor === opponentColor) {
 					allowedMovements.push([i, column])
 				}
 				break;
@@ -100,7 +101,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][column].value === null) {
 				allowedMovements.push([i, column])
 			} else {
-				if (board[i][column].valueColor === opponent) {
+				if (board[i][column].valueColor === opponentColor) {
 					allowedMovements.push([i, column])
 				}
 				break;
@@ -110,7 +111,7 @@ const Queen = ({ row, column, board, color, player, handleCellClicked }) => {
 		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
-	const queenImage = color === 'white' ? whiteQueen : blackQueen 
+	const queenImage = pieceColor === WHITE ? whiteQueen : blackQueen 
 	return (
 		<div 
 			onClick={() =>

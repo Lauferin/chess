@@ -1,10 +1,11 @@
 import blackBishop from './black_bishop.svg'
 import whiteBishop from './white_bishop.svg'
+import { WHITE, BLACK } from '../../../constants'
 
-const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
+const Bishop = ({ row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
 	const handleBishopClicked = (dragging) => {
-		const opponent = player === "white" ? "black" : "white";
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 		const allowedMovements = [];
 		let i = row; let j = column; // move right backwards
 		while (i < 7 && j < 7) {
@@ -12,7 +13,7 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -24,7 +25,7 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -36,7 +37,7 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -48,7 +49,7 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 			if (board[i][j].value === null) {
 				allowedMovements.push([i, j])
 			} else {
-				if (board[i][j].valueColor === opponent) {
+				if (board[i][j].valueColor === opponentColor) {
 					allowedMovements.push([i, j])
 				}
 				break;
@@ -57,7 +58,7 @@ const Bishop = ({ row, column, board, color, player, handleCellClicked }) => {
 		handleCellClicked(row, column, allowedMovements, dragging)
 	}
 
-	const bishopImage = color === 'white' ? whiteBishop : blackBishop 
+	const bishopImage = pieceColor === WHITE ? whiteBishop : blackBishop 
 	return (
 		<div 
 			onClick={() =>

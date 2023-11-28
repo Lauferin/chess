@@ -6,7 +6,7 @@ import King from '../pieces/king/King.js';
 import Knight from '../pieces//knight/Knight.js';
 import Bishop from '../pieces/bishop/Bishop.js';
 
-const Piece = ({ nature, row, column, board, color, player, handleCellClicked }) => {
+const Piece = ({ nature, row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
 	// const [{ isDragging }, drag] = useDrag({
 	const [, drag] = useDrag({
@@ -33,7 +33,7 @@ const Piece = ({ nature, row, column, board, color, player, handleCellClicked })
 	return (
 		<div ref={(node) => drag(drop(node))}>
 			{PieceComponent && (
-				<PieceComponent color={color} row={row} column={column} board={board} player={player} handleCellClicked={handleCellClicked} />
+				<PieceComponent pieceColor={pieceColor} row={row} column={column} board={board} playerColor={playerColor} handleCellClicked={handleCellClicked} />
 			)}
 			{!PieceComponent && (
 				<div style={{ width: '100%', height: '100%' }} ref={drop} onClick={() => handleCellClicked(row, column, [], false)}>

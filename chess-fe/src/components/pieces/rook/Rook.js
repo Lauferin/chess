@@ -1,11 +1,12 @@
+import { BLACK, WHITE } from '../../../constants';
 import blackRook from './black_rook.svg'
 import whiteRook from './white_rook.svg'
 
 
-const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
+const Rook = ({ row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
     const handleRookClicked = (dragging) => {
-		const opponent = player === "white" ? "black" : "white";
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
         const allowedMovements = [];
         let i = column; // move right
         while (i < 7) {
@@ -13,7 +14,7 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
             if (board[row][i].value === null) {
                 allowedMovements.push([row, i]);
             } else {
-                if (board[row][i].valueColor === opponent) {
+                if (board[row][i].valueColor === opponentColor) {
                     allowedMovements.push([row, i]);
                 }
                 break;
@@ -25,7 +26,7 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
             if (board[row][i].value === null) {
                 allowedMovements.push([row, i]);
             } else {
-                if (board[row][i].valueColor === opponent) {
+                if (board[row][i].valueColor === opponentColor) {
                     allowedMovements.push([row, i]);
                 }
                 break;
@@ -37,7 +38,7 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
             if (board[i][column].value === null) {
                 allowedMovements.push([i, column]);
             } else {
-                if (board[i][column].valueColor === opponent) {
+                if (board[i][column].valueColor === opponentColor) {
                     allowedMovements.push([i, column]);
                 }
                 break;
@@ -49,7 +50,7 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
             if (board[i][column].value === null) {
                 allowedMovements.push([i, column]);
             } else {
-                if (board[i][column].valueColor === opponent) {
+                if (board[i][column].valueColor === opponentColor) {
                     allowedMovements.push([i, column]);
                 }
                 break;
@@ -58,7 +59,7 @@ const Rook = ({ row, column, board, color, player, handleCellClicked }) => {
         handleCellClicked(row, column, allowedMovements, dragging);
     }
 
-    const rookImage = color === 'white' ? whiteRook : blackRook 
+    const rookImage = pieceColor === WHITE ? whiteRook : blackRook 
     return (
         <div 
             onClick={() =>

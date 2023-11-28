@@ -5,12 +5,12 @@ import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
-import { API_URL } from "../../constants";
+import { WHITE, BLACK, MOVEMENTS_URL } from "../../constants";
 
 const PLAYER = true;
 const OPPONENT = false;
 
-const ChessBoard = ({ game, player }) => {
+const ChessBoard = ({ game, playerColor }) => {
 
 	const [board, setBoard] = useState([]);
 	const [picked, setPicked] = useState(null);
@@ -18,8 +18,8 @@ const ChessBoard = ({ game, player }) => {
 	const [pawnToPromote, setPawnToPromote] = useState(null); // -1: no column with pawn to promote
 	const [turn, setTurn] = useState(null);
 	const [lastMovement, setLastMovement] = useState(null);
-	const opponent = player === "white" ? "black" : "white";
-	const colorRest = player === "white" ? 1 : 0;
+	// const [recentlyMoved, setRecentlyMoved] = useState(null)
+	const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 
 
 	const handleCellClicked = (rowIndex, columnIndex, futureAllowedMovements, dragging) => {
@@ -35,11 +35,11 @@ const ChessBoard = ({ game, player }) => {
 				if (!dragging) { // not dragging, so the intention is to deselect it
 					setPicked(null); // not picked anymore
 					setAllowedMovements([]);
-					pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color
+					pickedCell.cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'white' : 'gray'; // reset its color
 					setPawnToPromote(-1);
 				}
 			} else { // it's not the piece
-				if (cellBoard.valueColor === player) { // if it's another piece and it's also white, change
+				if (cellBoard.valueColor === playerColor) { // if it's another piece and it's also the player's, change
 					setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
 					if (isCheckIfMoved(rowIndex, columnIndex)) {
 						setAllowedMovements([]);
@@ -48,7 +48,7 @@ const ChessBoard = ({ game, player }) => {
 						setAllowedMovements(futureAllowedMovements);
 					}
 					board[rowIndex][columnIndex].cellColor = 'red';    
-					pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color
+					pickedCell.cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'white' : 'gray'; // reset its color
 					setPawnToPromote(-1);
 				} else { // it wants to move there
 					// console.log(allowedMovements, [rowIndex, columnIndex], allowedMovements.includes([rowIndex, columnIndex]))
@@ -63,7 +63,7 @@ const ChessBoard = ({ game, player }) => {
 				}
 			}
 		} else { // no cell previously picked
-			if (cellBoard.value && cellBoard.valueColor === player) {
+			if (cellBoard.value && cellBoard.valueColor === playerColor) {
 				setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
 				if (isCheckIfMoved(rowIndex, columnIndex)) { // can't move this piece because it would result in check
 					// WARNING! what happens if the piece want's to eat the potential checking peace?
@@ -179,21 +179,21 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const isPlayerKingInPosition = (row, column) => {
-		if (board[row][column].value === "king" && board[row][column].valueColor === player) {
+		if (board[row][column].value === "king" && board[row][column].valueColor === playerColor) {
 			return true;
 		}
 		return false;
 	}
 
 	const isPlayerDiagonalPieceInPosition = (row, column) => {
-		if ((board[row][column].value === "bishop" || board[row][column].value === "queen") && board[row][column].valueColor === opponent) {
+		if ((board[row][column].value === "bishop" || board[row][column].value === "queen") && board[row][column].valueColor === opponentColor) {
 			return true;
 		}
 		return false;
 	}
 
 	const isPlayerAdjacentPieceInPosition = (row, column) => {
-		if ((board[row][column].value === "rook" || board[row][column].value === "queen") && board[row][column].valueColor === opponent) {
+		if ((board[row][column].value === "rook" || board[row][column].value === "queen") && board[row][column].valueColor === opponentColor) {
 			return true;
 		}
 		return false;
@@ -213,7 +213,8 @@ const ChessBoard = ({ game, player }) => {
 		pickedCell.valueColor = null
 		setPicked(null)
 		setAllowedMovements([])
-		pickedCell.cellColor = (pickedRow + pickedColumn) % 2 === colorRest ? 'white' : 'gray'; // reset its color	
+		// setRecentlyMoved(pickedRow, pickedColumn, row, column)
+		pickedCell.cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'white' : 'gray'; // reset its color	
 		setBoard([...board]);
 		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
 		setTurn(OPPONENT);
@@ -233,11 +234,10 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
-		console.log("turn", turn, "game", game, "player", player)
-		const playerBoolean = player === "white" ? true : false
-		const data = {"game": game, "player": playerBoolean, "piece": piece, "movement": movement, "promoted": promoted}
+		console.log("turn", turn, "game", game, "playerColor", playerColor)
+		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": promoted}
 		try {
-			axios.post(API_URL, data).then(response => {
+			axios.post(MOVEMENTS_URL, data).then(response => {
 				console.log("movimiento mandado", response.data.pk);
 				setLastMovement(response.data.pk)
 			});
@@ -247,19 +247,19 @@ const ChessBoard = ({ game, player }) => {
 	}
 
 	const parse = (row, column) => {
-		const columnResult = player === "white" ? String.fromCharCode(97 + column) : String.fromCharCode(97 + (7 - column));
-		const rowResult = player === "black" ? row + 1 : 8 - row; 
+		const columnResult = playerColor === WHITE ? String.fromCharCode(97 + column) : String.fromCharCode(97 + (7 - column));
+		const rowResult = playerColor === BLACK ? row + 1 : 8 - row; 
 		return `${columnResult}${rowResult}`;
 	}
 
 	const unParse = (position) => {
-		const columnResult = player === "white" ? position.charCodeAt(0) - 97 : 7 - position.charCodeAt(0) + 97;
-		const rowResult = player === "black" ? position[1] - 1 : 8 - position[1]; 
+		const columnResult = playerColor === WHITE ? position.charCodeAt(0) - 97 : 7 - position.charCodeAt(0) + 97;
+		const rowResult = playerColor === BLACK ? position[1] - 1 : 8 - position[1]; 
 		return {"row": rowResult, "column": columnResult};
 	}
 
 	useEffect(() => {
-		if (player === null) {
+		if (playerColor === null) {
 			return;
 		}
 		const generateBoardChess = () => {
@@ -274,16 +274,15 @@ const ChessBoard = ({ game, player }) => {
 				['rook', 'knight', 'bishop', 'king', 'queen', 'bishop', 'knight', 'rook'],
 			]
 			const newMatrix = [];
-			// let lastColor = 1 HACELO CON BINARIO
 			for (let i = 0; i < 8; ++i) {
 				const row = [];
 				for (let j = 0; j < 8; ++j) {
-					const cellColor = (i + j) % 2 === colorRest ? 'white' : 'gray';
+					const cellColor = !!((i + j) % 2) === playerColor ? 'white' : 'gray';
 					row.push(
 						{
 							cellColor: cellColor,
 							value: pieces[i][j],
-							valueColor: i < 2 ? opponent : (i > 5 ? player : null)
+							valueColor: i < 2 ? opponentColor : (i > 5 ? playerColor : null)
 						}
 					);
 				}
@@ -292,28 +291,27 @@ const ChessBoard = ({ game, player }) => {
 			return newMatrix;
 		};
 		setBoard(generateBoardChess());
-		if (player === "white") {
+		if (playerColor === WHITE) {
 			setTurn(PLAYER);
 		} else {
 			setTurn(OPPONENT);
 			setLastMovement(0) // not null, so it asks for opponent's movement
 		}
-	}, [game, player, opponent, colorRest]);
+	}, [game, playerColor, opponentColor]);
 
 	useEffect(() => {
 		let interval;
 		const fetchData = async () => {
 			try {
-				const opponentBoolean = opponent === "white" ? "True" : "False"
-				const response = await fetch(`${API_URL}?player=${opponentBoolean}&game=${game}&pk__gt=${lastMovement}`);
+				const response = await fetch(`${MOVEMENTS_URL}?player=${opponentColor ? "True" : "False"}&game=${game}&pk__gt=${lastMovement}`);
 				const data = await response.json();
-				console.log('Data from webhook:', data);
+				console.log('Data from backend:', data);
 				if (data.length) {
 					setLastMovement(null)
 					moveOpponent(data[0]);
 				}
 			} catch (error) {
-				console.error('Error fetching data from webhook:', error);
+				console.error('Error fetching data from backend:', error);
 			}
 		};
 
@@ -345,9 +343,9 @@ const ChessBoard = ({ game, player }) => {
 									// onClick={() => handleCellClicked(rowIndex, cellIndex)}
 								>
 									{pawnToPromote === cellIndex && rowIndex === 0 && 
-										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} player={player} />}
+										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} playerColor={playerColor} />}
 									<Piece 
-										nature={cell.value} row={rowIndex} column={cellIndex} board={board} color={cell.valueColor} player={player}
+										nature={cell.value} row={rowIndex} column={cellIndex} board={board} pieceColor={cell.valueColor} playerColor={playerColor}
 										handleCellClicked={handleCellClicked} />
 								</td>
 							))}
