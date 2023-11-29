@@ -29,8 +29,8 @@ const App = () => {
 
 	return (
 		<div className="App">
-			<Header startGame={startGame} />
-			<ChessBoard game={game} playerColor={playerColor} />
+			<Header startGame={startGame} gameState={game} />
+			<ChessBoard game={game} playerColor={playerColor} endGame={setGame} />
 		</div>
 	);
 }

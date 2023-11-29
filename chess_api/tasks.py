@@ -1,5 +1,4 @@
 from celery import shared_task
-from time import sleep
 from .models import Movement, Game
 from .pieces import Rook, Knight, Bishop, King, Queen, Pawn
 from .util import unParse
@@ -8,9 +7,7 @@ from .movements import get_movement
 
 @shared_task
 def process_movement_async(movement_id=None, game_id=None):
-    print("SCRUPUS")
-    # Simulate some asynchronous processing
-    sleep(1)  # Replace with your actual asynchronous processing logic
+    # time.sleep(1)
     player = None
     movements_array = []
 

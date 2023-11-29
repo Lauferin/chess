@@ -5,12 +5,13 @@ import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
-import { WHITE, BLACK, MOVEMENTS_URL } from "../../constants";
+import { WHITE, BLACK, CHECKMATE_OPPONENT, MOVEMENTS_URL } from "../../constants";
+// import { WHITE, BLACK, CHECKMATE_OPPONENT, CHECKMATE_PLAYER, DRAWN, MOVEMENTS_URL } from "../../constants";
 
 const PLAYER = true;
 const OPPONENT = false;
 
-const ChessBoard = ({ game, playerColor }) => {
+const ChessBoard = ({ game, playerColor, endGame }) => {
 
 	const [board, setBoard] = useState([]);
 	const [picked, setPicked] = useState(null);
@@ -74,9 +75,10 @@ const ChessBoard = ({ game, playerColor }) => {
 		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 		const movements = [];
 		const forward = turn ? 1 : -1;
+		const initialPosition = turn ? 6 : 1;
 		if (board[row - forward][column].value === null) {
 			movements.push([row - forward, column]);
-			if (row === 6 && board[row - 2 * forward][column].value === null) {
+			if (row === initialPosition && board[row - 2 * forward][column].value === null) {
 				movements.push([row - 2 * forward, column]);
 			}
 		}
@@ -176,7 +178,7 @@ const ChessBoard = ({ game, playerColor }) => {
 					movements.push([i, j]);
 				}
 				break;
-			}    
+			}
 		}
 		return movements;
 	}
@@ -374,10 +376,14 @@ const ChessBoard = ({ game, playerColor }) => {
 		pickedCell.value = null;
 		pickedCell.valueColor = null;
 		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
-		setAllowedMovements(getAllowedMovements([...board]));
+		const movements = getAllowedMovements([...board]);
+		setAllowedMovements(movements);
 		setBoard([...board]);
-
-		setTurn(PLAYER);
+		if (movements.length === 0) {
+			endGame(CHECKMATE_OPPONENT); //check if it's check mate or drawn
+		} else {
+			setTurn(PLAYER);
+		}
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
@@ -407,7 +413,7 @@ const ChessBoard = ({ game, playerColor }) => {
 	}
 
 	useEffect(() => {
-		if (playerColor === null) {
+		if (playerColor === null || game < 0) { // game < 0 means the game is not active (checkmate or something)
 			return;
 		}
 		const generateBoardChess = () => {

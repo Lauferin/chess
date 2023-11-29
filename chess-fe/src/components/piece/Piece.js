@@ -33,7 +33,7 @@ const Piece = ({ nature, row, column, board, pieceColor, playerColor, handleCell
 	return (
 		<div ref={(node) => drag(drop(node))}>
 			{PieceComponent && (
-				<PieceComponent pieceColor={pieceColor} row={row} column={column} board={board} playerColor={playerColor} handleCellClicked={handleCellClicked} />
+				<PieceComponent pieceColor={pieceColor} row={row} column={column} handleCellClicked={handleCellClicked} />
 			)}
 			{!PieceComponent && (
 				<div style={{ width: '100%', height: '100%' }} ref={drop} onClick={() => handleCellClicked(row, column, [], false)}>
