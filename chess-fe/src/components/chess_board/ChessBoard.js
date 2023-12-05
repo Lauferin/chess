@@ -5,7 +5,7 @@ import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
-import { WHITE, BLACK, CHECKMATE_OPPONENT, MOVEMENTS_URL } from "../../constants";
+import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, MOVEMENTS_URL } from "../../constants";
 // import { WHITE, BLACK, CHECKMATE_OPPONENT, CHECKMATE_PLAYER, DRAWN, MOVEMENTS_URL } from "../../constants";
 
 const PLAYER = true;
@@ -279,8 +279,10 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		}
 	}
 
-	const getAllowedMovements = (board) => {
-		const movements = calculateAllowedMovements(board, playerColor, true);
+	const getAllowedMovements = (board, playerColor, player) => {
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
+		const opponent = player == true ? false : true;
+		const movements = calculateAllowedMovements(board, playerColor, player);
 		const movementsWithoutCheck = [];
 		movements.forEach(movement => {
 			const newBoard = JSON.parse(JSON.stringify(board));
@@ -289,7 +291,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			newBoard[movement.piece[0]][movement.piece[1]].value = null
 			newBoard[movement.piece[0]][movement.piece[1]].valueColor = null
 			const king = getPiecePosition(newBoard, "king", playerColor);
-			const opponentMovements = calculateAllowedMovements(newBoard, opponentColor, false);
+			const opponentMovements = calculateAllowedMovements(newBoard, opponentColor, opponent);
 			if (!opponentMovements.some(e => e.movement[0] === king.row && e.movement[1] === king.column)) {
 				movementsWithoutCheck.push(movement);
 			}
@@ -363,7 +365,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
 		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
-		setTurn(OPPONENT);
 	}
 
 	const moveOpponent = (data) => {
@@ -376,7 +377,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		pickedCell.value = null;
 		pickedCell.valueColor = null;
 		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
-		const movements = getAllowedMovements([...board]);
+		const movements = getAllowedMovements([...board], playerColor, PLAYER);
 		setAllowedMovements(movements);
 		setBoard([...board]);
 		if (movements.length === 0) {
@@ -394,6 +395,15 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			axios.post(MOVEMENTS_URL, data).then(response => {
 				console.log("movimiento mandado", response.data.pk);
 				setLastMovement(response.data.pk)
+				const opponentColor = playerColor === WHITE ? BLACK : WHITE;
+				const movements = getAllowedMovements(board, opponentColor, OPPONENT);
+				console.log("movements", movements)
+				if (movements.length === 0) {
+					endGame(CHECKMATE_PLAYER); //check if it's check mate or drawn
+					setTurn(null);
+				} else {
+					setTurn(OPPONENT);
+				}		
 			});
 		} catch (error) {
 			console.log("server unavailable or bad request", error)
@@ -446,7 +456,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		};
 		setBoard(() => {
 			const newBoard = generateBoardChess();
-			setAllowedMovements(getAllowedMovements(newBoard));
+			setAllowedMovements(getAllowedMovements(newBoard, playerColor, PLAYER));
 			return newBoard;
 		});
 		if (playerColor === WHITE) {
@@ -475,7 +485,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			}
 		};
 
-		if (lastMovement !== null) {
+		if (lastMovement !== null && game != -1) {
 			fetchData();
 			interval = setInterval(() => {
 				fetchData();

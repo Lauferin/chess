@@ -34,9 +34,6 @@ def get_turn_allowed_movements(board, pieces, player, turn=True):
     allowed_movements = []
     player_pieces = [piece for piece in pieces if piece.get_color() == player]
     for piece in player_pieces:
-        # allowed_movements += [(parse(*piece.get_position(), player), parse(movement[0], movement[1], player), movement[2]) if len(movement) == 3
-        #                  else (parse(*piece.get_position(), player), parse(movement[0], movement[1], player))
-        #                  for movement in piece.get_allowed_movements(board, player, turn=True)]
         allowed_movements += [(piece.get_position(), movement) for movement in piece.get_allowed_movements(board, player, turn=turn)]
     return allowed_movements
 
@@ -44,8 +41,6 @@ def get_turn_allowed_movements(board, pieces, player, turn=True):
 def get_allowed_movements(board, pieces, player):
     movements = get_turn_allowed_movements(board, pieces, player)
     opponent = BLACK if player == WHITE else WHITE
-    print("movements: ", movements)
-    print("mov1: ", len(movements))
     movements_without_check = []
     for movement in movements:
         piece_row = movement[0][0]
@@ -60,7 +55,7 @@ def get_allowed_movements(board, pieces, player):
         new_board[piece_row][piece_col] = None
         king = [piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == player][0]
         opponentMovements = get_turn_allowed_movements(new_board, pieces, opponent, False)
-        if king.get_position() not in [movement[1] for movement in opponentMovements]:
+        if king.get_position() not in [(movement[1][0], movement[1][1]) for movement in opponentMovements]: # not just movement(1) because of promotions
             movements_without_check.append(movement)
 
     return movements_without_check
