@@ -7,15 +7,27 @@ from copy import deepcopy
 import random
 
 
-def move(selected, player):
+def move(board, selected, player, state):
+    if state == True:
+        return {"piece": None, "movement": None, "promoted": None, "state": get_state(board, player)}
     formatted_movement = {
         "piece": parse(selected[0][0], selected[0][1], player), 
         "movement": parse(selected[1][0], selected[1][1], player), 
         "promoted": selected[1][2] if len(selected[1]) == 3 else None
     }
-    movement_object = {**formatted_movement, "state": "ok"} # state can be checkmate or others
+    movement_object = {**formatted_movement, "state": "ok"}
 
     return movement_object
+
+
+def get_state(board, player): # not really doing anything with this info yet
+    pieces = [piece for row in board for piece in row if piece is not None]
+    king = [piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == player][0]
+    opponent = BLACK if player == WHITE else WHITE
+    opponentMovements = get_turn_allowed_movements(board, pieces, opponent, False)
+    if king.get_position() in [movement[1] for movement in opponentMovements]:
+        return "checkmate"
+    return "drawn"
 
 
 def get_turn_allowed_movements(board, pieces, player, turn=True):
@@ -35,33 +47,21 @@ def get_allowed_movements(board, pieces, player):
     print("movements: ", movements)
     print("mov1: ", len(movements))
     movements_without_check = []
-    # from celery.contrib import rdb;rdb.set_trace()
     for movement in movements:
         piece_row = movement[0][0]
         piece_col = movement[0][1]
         movement_row = movement[1][0]
         movement_col = movement[1][1]
-        print(((piece_row, piece_col), (movement_row, movement_col)))
         new_board = deepcopy(board)
-
-        # new_pieces = [piece for piece in pieces if piece.get_position() != (movement_row, movement_col)]
+        # make pieces from scratch, since we deep-copied the board, and we want to be able to compair with it
         pieces = [piece for row in new_board for piece in row if piece is not None and piece.get_position() != (movement_row, movement_col)]
-
-
         new_board[movement_row][movement_col] = new_board[piece_row][piece_col]
         new_board[movement_row][movement_col].change_position(movement_row, movement_col)
         new_board[piece_row][piece_col] = None
-        print("length king", len([piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == player]))
         king = [piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == player][0]
-        print("king", king.get_position())
-        print("pieces length", len(pieces))
         opponentMovements = get_turn_allowed_movements(new_board, pieces, opponent, False)
-        print(king.get_position() not in [movement[1] for movement in opponentMovements])
-        print("opponent", opponentMovements)
         if king.get_position() not in [movement[1] for movement in opponentMovements]:
             movements_without_check.append(movement)
-    # ESTAN DESAPARECIENDO LAS PIEZAS EN PIECES PARECE
-    print("mov2: ", len(movements_without_check))
 
     return movements_without_check
 
@@ -71,11 +71,10 @@ def get_movement(board, pieces, player, algorithm):
     def basic():
 
         allowed_movements = get_allowed_movements(board, pieces, player)
-        # print(allowed_movements)
+        if len(allowed_movements) == 0:
+            return move(board, None, player, True)
         selected = random.choice(allowed_movements)
-        # from celery.contrib import rdb;rdb.set_trace()
-
-        return move(selected, player)
+        return move(None, selected, player, False)
 
 
     def basic2():
