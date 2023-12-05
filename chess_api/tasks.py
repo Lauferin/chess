@@ -22,7 +22,6 @@ def process_movement_async(movement_id=None, game_id=None):
             {"piece": movement.piece, "movement": movement.movement, "promoted": movement.promoted, "player": movement.player} 
             for movement in game_movements
         ]
-        print(movements_array)
     else: # we received game_id
         player = WHITE
         game = Game.objects.get(pk=game_id)
