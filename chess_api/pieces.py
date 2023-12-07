@@ -19,50 +19,12 @@ class Piece(object):
     def get_color(self):
         return self._color
 
-
-class Pawn(Piece):
-    _name = "Pawn"
-
-    promotions = ["knight", "bishop", "rook", "queen"]
-
-    def __init__(self, color):
-        super().__init__(color)
-        self._passant = False
-
-    # def move(self, times=1, direction="ahead"):
-    #     call super for seeing if there is a check mate? or what happens with the king?
-    #     if self._row < 7 and board[]
-
-    def get_allowed_movements(self, board, player, turn=True):
-        row, col = self._row, self._col
-        allowed_movements = []
-        forward = 1 if turn else -1
-        initialPosition = 1 if turn else 6
-        promotionPosition = 6 if turn else 1
-        if row == promotionPosition:
-            if board[row + forward][col] is None:
-                allowed_movements.extend([(row + forward, col, promotion) for promotion in self.promotions])
-        elif board[row + forward][col] is None:
-            allowed_movements.append((row + forward, col))
-            if row == initialPosition and board[row + 2 * forward][col] is None:
-                allowed_movements.append((row + 2 * forward, col))
-        if col > 0 and board[row + forward][col - 1] is not None and board[row + forward][col - 1].get_color() != player:
-            if row == promotionPosition:
-                allowed_movements.extend([(row + forward, col - 1, promotion) for promotion in self.promotions])
-            else:
-                allowed_movements.append((row + forward, col - 1))
-        if col < 7 and board[row + forward][col + 1] is not None and board[row + forward][col + 1].get_color() != player:
-            if row == promotionPosition:
-                allowed_movements.extend([(row + forward, col + 1, promotion) for promotion in self.promotions])
-            else:
-                allowed_movements.append((row + forward, col + 1))
-        # add rule of crazy pawn
-
-        return allowed_movements
+    def get_score(self, player, turn=True, score=None):
+        return score if self.get_color() == player else -score
 
 
 class Knight(Piece):
-    _name = "Knight"
+    _name = "knight"
 
     def get_allowed_movements(self, board, player, turn=None):
         row, col = self._row, self._col
@@ -90,9 +52,12 @@ class Knight(Piece):
                     allowed_movements.append((row + 2, col - 1))
         return allowed_movements
 
+    def get_score(self, player, turn=True, score=None):
+        return super().get_score(player, turn, 30)
+
 
 class Bishop(Piece):
-    _name = "Bishop"
+    _name = "bishop"
 
     def get_allowed_movements(self, board, player, turn=None):
         row, col = self._row, self._col
@@ -136,9 +101,12 @@ class Bishop(Piece):
                 break
         return allowed_movements
 
+    def get_score(self, player, turn=True, score=None):
+        return super().get_score(player, turn, 31) # less if there in only one?
+
 
 class Rook(Piece):
-    _name = "Rook"
+    _name = "rook"
 
     def __init__(self, color):
         super().__init__(color)
@@ -186,9 +154,12 @@ class Rook(Piece):
 
         return allowed_movements
 
+    def get_score(self, player, turn=True, score=None):
+        return super().get_score(player, turn, 50)
+
 
 class Queen(Piece):
-    _name = "Queen"
+    _name = "queen"
 
     def get_allowed_movements(self, board, player, turn=None):
         row, col = self._row, self._col
@@ -272,6 +243,57 @@ class Queen(Piece):
 
         return allowed_movements
 
+    def get_score(self, player, turn=True, score=None):
+        return super().get_score(player, turn, 90)
+
+
+class Pawn(Piece):
+    _name = "pawn"
+
+    promotions = [Knight, Bishop, Rook, Queen]
+
+    def __init__(self, color):
+        super().__init__(color)
+        self._passant = False
+
+    # def move(self, times=1, direction="ahead"):
+    #     call super for seeing if there is a check mate? or what happens with the king?
+    #     if self._row < 7 and board[]
+
+    def get_allowed_movements(self, board, player, turn=True):
+        row, col = self._row, self._col
+        allowed_movements = []
+        forward = 1 if turn else -1
+        initialPosition = 1 if turn else 6
+        promotionPosition = 6 if turn else 1
+        if row == promotionPosition:
+            if board[row + forward][col] is None:
+                allowed_movements.extend([(row + forward, col, promotion) for promotion in self.promotions])
+        elif board[row + forward][col] is None:
+            allowed_movements.append((row + forward, col))
+            if row == initialPosition and board[row + 2 * forward][col] is None:
+                allowed_movements.append((row + 2 * forward, col))
+        if col > 0 and board[row + forward][col - 1] is not None and board[row + forward][col - 1].get_color() != player:
+            if row == promotionPosition:
+                allowed_movements.extend([(row + forward, col - 1, promotion) for promotion in self.promotions])
+            else:
+                allowed_movements.append((row + forward, col - 1))
+        if col < 7 and board[row + forward][col + 1] is not None and board[row + forward][col + 1].get_color() != player:
+            if row == promotionPosition:
+                allowed_movements.extend([(row + forward, col + 1, promotion) for promotion in self.promotions])
+            else:
+                allowed_movements.append((row + forward, col + 1))
+        # add rule of crazy pawn
+
+        return allowed_movements
+    
+    def get_score(self, player, turn=True, score=None):
+        score = 9
+        row, _ = self.get_position()
+        squares_forward = row if player is self.get_color() else 7 - row
+        score += squares_forward * 1
+        return super().get_score(player, turn, score)
+
 
 class King(Piece):
     _name = KING
@@ -307,3 +329,6 @@ class King(Piece):
 
     def is_free_or_opponent(self, board, player, row, col):
         return board[row][col] is None or board[row][col].get_color() != player
+
+    def get_score(self, player, turn=True, score=None):
+        return 0

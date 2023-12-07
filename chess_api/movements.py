@@ -13,7 +13,7 @@ def move(board, selected, player, state):
     formatted_movement = {
         "piece": parse(selected[0][0], selected[0][1], player), 
         "movement": parse(selected[1][0], selected[1][1], player), 
-        "promoted": selected[1][2] if len(selected[1]) == 3 else None
+        "promoted": selected[1][2](player).get_name() if len(selected[1]) == 3 else None
     }
     movement_object = {**formatted_movement, "state": "ok"}
 
@@ -30,6 +30,14 @@ def get_state(board, player): # not really doing anything with this info yet
     return "drawn"
 
 
+def get_score(pieces, player, movement):
+    score = sum(piece.get_score(player) for piece in pieces)
+    if len(movement) == 3:
+        new_piece = movement[2](player)
+        score += new_piece.get_score(player) - 16
+    return score
+
+
 def get_turn_allowed_movements(board, pieces, player, turn=True):
     allowed_movements = []
     player_pieces = [piece for piece in pieces if piece.get_color() == player]
@@ -42,6 +50,7 @@ def get_allowed_movements(board, pieces, player):
     movements = get_turn_allowed_movements(board, pieces, player)
     opponent = BLACK if player == WHITE else WHITE
     movements_without_check = []
+    # from celery.contrib import rdb;rdb.set_trace()
     for movement in movements:
         piece_row = movement[0][0]
         piece_col = movement[0][1]
@@ -49,14 +58,15 @@ def get_allowed_movements(board, pieces, player):
         movement_col = movement[1][1]
         new_board = deepcopy(board)
         # make pieces from scratch, since we deep-copied the board, and we want to be able to compair with it
-        pieces = [piece for row in new_board for piece in row if piece is not None and piece.get_position() != (movement_row, movement_col)]
         new_board[movement_row][movement_col] = new_board[piece_row][piece_col]
         new_board[movement_row][movement_col].change_position(movement_row, movement_col)
         new_board[piece_row][piece_col] = None
+        pieces = [piece for row in new_board for piece in row if piece is not None]
+        score = get_score(pieces, player, movement[1])
         king = [piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == player][0]
         opponentMovements = get_turn_allowed_movements(new_board, pieces, opponent, False)
         if king.get_position() not in [(movement[1][0], movement[1][1]) for movement in opponentMovements]: # not just movement(1) because of promotions
-            movements_without_check.append(movement)
+            movements_without_check.append(movement + (score, ))
 
     return movements_without_check
 
@@ -72,8 +82,15 @@ def get_movement(board, pieces, player, algorithm):
         return move(None, selected, player, False)
 
 
-    def basic2():
-        return "This is case 2"
+    def beginner():
+
+        allowed_movements = get_allowed_movements(board, pieces, player)
+        if len(allowed_movements) == 0:
+            return move(board, None, player, True)
+        best_score = max(movement[2] for movement in allowed_movements)
+        best_movements = [movement for movement in allowed_movements if movement[2] == best_score]        
+        selected = random.choice(best_movements)
+        return move(None, selected, player, False)
 
 
     def basic3():
@@ -81,7 +98,7 @@ def get_movement(board, pieces, player, algorithm):
 
 
     algorithms = {
-        "basic2": basic2,
+        "beginner": beginner,
         "basic3": basic3
     }
 
