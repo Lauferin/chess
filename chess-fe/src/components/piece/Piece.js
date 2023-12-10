@@ -5,6 +5,8 @@ import Queen from '../pieces/queen/Queen.js';
 import King from '../pieces/king/King.js';
 import Knight from '../pieces//knight/Knight.js';
 import Bishop from '../pieces/bishop/Bishop.js';
+import { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } from "../../constants";
+
 
 const Piece = ({ nature, row, column, board, pieceColor, playerColor, handleCellClicked }) => {
 
@@ -22,12 +24,12 @@ const Piece = ({ nature, row, column, board, pieceColor, playerColor, handleCell
 	});
 
 	const PieceComponent = {
-		rook: Rook,
-		pawn: Pawn,
-		queen: Queen,
-		king: King,
-		knight: Knight,
-		bishop: Bishop,
+		[ROOK]: Rook,
+		[PAWN]: Pawn,
+		[QUEEN]: Queen,
+		[KING]: King,
+		[KNIGHT]: Knight,
+		[BISHOP]: Bishop,
 	}[nature];
 
 	return (
