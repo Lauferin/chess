@@ -416,7 +416,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			movedPieces[movement.column] = true; // NO ANDA?
 			setMovedPieces([...movedPieces]);
 		}
-		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], data.promoted)
+		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], translatePiece(data.promoted))
 		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
 		const movements = getAllowedMovements([...board], playerColor, PLAYER); // should be after movePiece finishes but it gets to the same result.
 		setAllowedMovements(movements);
@@ -467,6 +467,16 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const columnResult = playerColor === WHITE ? position.charCodeAt(0) - 97 : 7 - position.charCodeAt(0) + 97;
 		const rowResult = playerColor === BLACK ? position[1] - 1 : 8 - position[1]; 
 		return {"row": rowResult, "column": columnResult};
+	}
+
+	const translatePiece = (piece) => {
+		switch(piece) {
+			case "rook": return ROOK;
+			case "queen": return QUEEN;
+			case "bishop": return BISHOP;
+			case "knight": return KNIGHT
+			default: return piece;
+		}
 	}
 
 	useEffect(() => {
