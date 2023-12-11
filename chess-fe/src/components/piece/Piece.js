@@ -8,7 +8,7 @@ import Bishop from '../pieces/bishop/Bishop.js';
 import { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } from "../../constants";
 
 
-const Piece = ({ nature, row, column, board, pieceColor, playerColor, handleCellClicked }) => {
+const Piece = ({ nature, row, column, pieceColor, handleCellClicked }) => {
 
 	// const [{ isDragging }, drag] = useDrag({
 	const [, drag] = useDrag({

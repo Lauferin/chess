@@ -269,18 +269,40 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			movements.push([row + 1, column]);
 		}
 		if (turn && movedPieces[column] === false) {
-			if (isCastlingAllowed(board, row, column, 0)) {
+			if (isCastlingAllowed(board, row, column, 0, playerColor, turn)) {
 				movements.push([7, column - 2]);
 			}
-			if (isCastlingAllowed(board, row, column, 7)) {
+			if (isCastlingAllowed(board, row, column, 7, playerColor, turn)) {
 				movements.push([7, column + 2]);
 			}	
 		}
 		return movements;
 	}
 
-	const isCastlingAllowed = (board, row, column, rook) => {
-		return true
+	const isCastlingAllowed = (board, row, column, rookColumn, playerColor, player) => {
+		if (movedPieces[rookColumn] === true) { // if the rook has been moved before, it's not valid
+			return false;
+		}
+		const castlingSideFactor = rookColumn > column ? 1 : -1;
+		let i = column + castlingSideFactor; // if there is a piece in the middle, it's not valid
+		while (i !== rookColumn) {
+			if (board[row][i].value !== null) {
+				return false;
+			}
+			i += 1 * castlingSideFactor;
+		}
+		i = 0; // if it's a check between the king (including it) and two squares to the castling side, it's not valid
+		while (i <= 2) {
+			const columnToAnalyze = column + i * castlingSideFactor;
+			const opponentColor = playerColor === WHITE ? BLACK : WHITE;
+			const opponent = player === true ? false : true;
+			const opponentMovements = calculateAllowedMovements(board, opponentColor, opponent);
+			if (opponentMovements.some(e => e.movement[0] === row && e.movement[1] === columnToAnalyze)) {
+				return false;
+			}
+			++i;
+		}
+		return true;
 	}
 
 	const getPiecePosition = (board, piece, color) => {
@@ -299,10 +321,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const movementsWithoutCheck = [];
 		movements.forEach(movement => {
 			const newBoard = JSON.parse(JSON.stringify(board));
-			newBoard[movement.movement[0]][movement.movement[1]].value = newBoard[movement.piece[0]][movement.piece[1]].value;
-			newBoard[movement.movement[0]][movement.movement[1]].valueColor = newBoard[movement.piece[0]][movement.piece[1]].valueColor;
-			newBoard[movement.piece[0]][movement.piece[1]].value = null
-			newBoard[movement.piece[0]][movement.piece[1]].valueColor = null
+			movePiece(newBoard[movement.piece[0]][movement.piece[1]], newBoard[movement.movement[0]][movement.movement[1]], null)
 			const king = getPiecePosition(newBoard, KING, playerColor);
 			const opponentMovements = calculateAllowedMovements(newBoard, opponentColor, opponent);
 			if (!opponentMovements.some(e => e.movement[0] === king.row && e.movement[1] === king.column)) {
@@ -367,32 +386,23 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 	}
 
 	const move = (row, column, promoted) => {
-		const cellBoard = board[row][column];
+		console.log("movedPieces", movedPieces)
 		const { pickedRow, pickedColumn } = picked;
 		const pickedCell = board[pickedRow][pickedColumn];
 		if (pickedCell.value === KING) {
 			movedPieces[pickedColumn] = true;
 			if (Math.abs(pickedColumn - column) > 1) {
 				const rookColumn = pickedColumn < 5 ? 0 : 7;
-				board[pickedRow][pickedColumn - 1].value = board[pickedRow][rookColumn].value;
-				board[pickedRow][pickedColumn - 1].valueColor = board[pickedRow][rookColumn].valueColor;
-				board[pickedRow][rookColumn].value = null;
-				board[pickedRow][rookColumn].valueColor = null;
-				movedPieces[pickedColumn] = true;
+				movePiece(board[pickedRow][rookColumn], board[pickedRow][pickedColumn - 1], null)
 				movedPieces[rookColumn] = true;
 				setMovedPieces([...movedPieces]);
 			}
 		}
-		if (pickedCell.value === ROOK) {
+		if (pickedRow === 7 && pickedCell.value === ROOK) {
 			movedPieces[pickedColumn] = true;
 			setMovedPieces([...movedPieces]);
 		}
-		cellBoard.value = promoted ? promoted : pickedCell.value;
-		cellBoard.valueColor = pickedCell.valueColor;
-		pickedCell.value = null;
-		pickedCell.valueColor = null;
-		console.log(pickedRow, pickedColumn, board[pickedRow][pickedColumn].value)
-
+		movePiece(board[pickedRow][pickedColumn], board[row][column], promoted)
 		setPicked(null);
 		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
@@ -402,14 +412,13 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 	const moveOpponent = (data) => {
 		const piece = unParse(data.piece);
 		const movement = unParse(data.movement);
-		const pickedCell = board[piece.row][piece.column];
-		const movementCell = board[movement.row][movement.column];
-		movementCell.value = data.promoted ? data.promoted : pickedCell.value;
-		movementCell.valueColor = pickedCell.valueColor;
-		pickedCell.value = null;
-		pickedCell.valueColor = null;
+		if (movement.row === 7 && board[movement.row][movement.column].value === ROOK) {
+			movedPieces[movement.column] = true; // NO ANDA?
+			setMovedPieces([...movedPieces]);
+		}
+		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], data.promoted)
 		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
-		const movements = getAllowedMovements([...board], playerColor, PLAYER);
+		const movements = getAllowedMovements([...board], playerColor, PLAYER); // should be after movePiece finishes but it gets to the same result.
 		setAllowedMovements(movements);
 		setBoard([...board]);
 		if (movements.length === 0) {
@@ -417,6 +426,13 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		} else {
 			setTurn(PLAYER);
 		}
+	}
+
+	const movePiece = (cell1, cell2, promoted) => {
+		cell2.value = promoted ? promoted : cell1.value
+		cell2.valueColor = cell1.valueColor
+		cell1.value = null
+		cell1.valueColor = null
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
@@ -545,8 +561,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 									{pawnToPromote === cellIndex && rowIndex === 0 && 
 										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} playerColor={playerColor} />}
 									<Piece 
-										nature={cell.value} row={rowIndex} column={cellIndex} board={board} pieceColor={cell.valueColor} playerColor={playerColor}
-										handleCellClicked={handleCellClicked} />
+										nature={cell.value} row={rowIndex} column={cellIndex} pieceColor={cell.valueColor} handleCellClicked={handleCellClicked} />
 								</td>
 							))}
 						</tr>
