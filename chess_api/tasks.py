@@ -2,7 +2,7 @@ from celery import shared_task
 from .models import Movement, Game
 from .pieces import Rook, Knight, Bishop, King, Queen, Pawn
 from .util import unParse
-from .constants import WHITE, BLACK
+from .constants import WHITE, BLACK, KING
 from .movements import get_movement
 
 @shared_task
@@ -10,8 +10,6 @@ def process_movement_async(movement_id=None, game_id=None):
     # time.sleep(1)
     player = None
     movements_array = []
-
-    # from celery.contrib import rdb;rdb.set_trace()
 
     if movement_id != None:
         game = Movement.objects.get(pk=movement_id).game
@@ -60,16 +58,19 @@ def process_movement_async(movement_id=None, game_id=None):
         board[movement_row][movement_column] = board[piece_row][piece_column]
         board[movement_row][movement_column].change_position(movement_row, movement_column)
         board[piece_row][piece_column] = None
+
+        if isCastling(board, movement_row, movement_column, piece_column):
+            # from celery.contrib import rdb;rdb.set_trace()
+            rook_column = 0 if movement_column < piece_column else 7
+            movement_direction = 1 if movement_column < piece_column else -1
+            board[movement_row][movement_column + movement_direction] = board[piece_row][rook_column]
+            board[movement_row][movement_column + movement_direction].change_position(movement_row, movement_column + movement_direction)
+            board[piece_row][rook_column] = None
         if movement["promoted"] != None:
             board[movement_row][movement_column] = promotion_pieces[movement["promoted"]](movement["player"])
             board[movement_row][movement_column].change_position(movement_row, movement_column)
             pieces = [piece for piece in pieces if piece.get_position() != (movement_row, movement_column)]
             pieces.append(board[movement_row][movement_column])
-
-
-    # board_state = [[piece.get_name() if piece is not None else "" for piece in row] for row in board]
-    # print(board_state)
-    # print("total pieces: ", len(pieces))
 
     # from celery.contrib import rdb;rdb.set_trace()
     selected_movement = get_movement(board, pieces, player, game.opponent)
@@ -85,3 +86,9 @@ def process_movement_async(movement_id=None, game_id=None):
         return new_movement.id
 
     return -1
+
+
+def isCastling(board, movement_row, movement_column, piece_column):
+    if board[movement_row][movement_column].get_name() == KING and abs(movement_column - piece_column) == 2:
+        return True
+    return False
