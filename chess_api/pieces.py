@@ -1,3 +1,4 @@
+from .movements import get_turn_allowed_movements
 from .constants import KING, WHITE, BLACK
 
 
@@ -5,6 +6,7 @@ class Piece(object):
 
     def __init__(self, color):
         self._color = color
+        self._moved = False
     
     def get_name(self):
         return self._name
@@ -12,9 +14,11 @@ class Piece(object):
     def get_position(self):
         return self._row, self._col
 
-    def change_position(self, row, col):
+    def change_position(self, row, col, moved=True):
         self._row = row
         self._col = col
+        if moved:
+            self._moved = True
 
     def get_color(self):
         return self._color
@@ -26,7 +30,7 @@ class Piece(object):
 class Knight(Piece):
     _name = "knight"
 
-    def get_allowed_movements(self, board, player, turn=None):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=None):
         row, col = self._row, self._col
         allowed_movements = []
 
@@ -59,7 +63,7 @@ class Knight(Piece):
 class Bishop(Piece):
     _name = "bishop"
 
-    def get_allowed_movements(self, board, player, turn=None):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=None):
         row, col = self._row, self._col
         allowed_movements = []
         
@@ -110,9 +114,8 @@ class Rook(Piece):
 
     def __init__(self, color):
         super().__init__(color)
-        self._moved = False
 
-    def get_allowed_movements(self, board, player, turn=None):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=None):
         allowed_movements = []
         row, col = self._row, self._col
         i = col; # move right
@@ -154,6 +157,9 @@ class Rook(Piece):
 
         return allowed_movements
 
+    def has_moved(self):
+        return self._moved
+
     def get_score(self, player, turn=True, score=None):
         return super().get_score(player, turn, 50)
 
@@ -161,7 +167,7 @@ class Rook(Piece):
 class Queen(Piece):
     _name = "queen"
 
-    def get_allowed_movements(self, board, player, turn=None):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=None):
         row, col = self._row, self._col
         allowed_movements = []
         
@@ -260,7 +266,7 @@ class Pawn(Piece):
     #     call super for seeing if there is a check mate? or what happens with the king?
     #     if self._row < 7 and board[]
 
-    def get_allowed_movements(self, board, player, turn=True):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=True):
         row, col = self._row, self._col
         allowed_movements = []
         forward = 1 if turn else -1
@@ -300,9 +306,8 @@ class King(Piece):
 
     def __init__(self, color):
         super().__init__(color)
-        self._moved = False
 
-    def get_allowed_movements(self, board, player, turn=None):
+    def get_allowed_movements(self, board, pieces, player, check_castling, turn=None):
         row, col = self._row, self._col
         allowed_movements = []
 
@@ -324,8 +329,36 @@ class King(Piece):
             allowed_movements.append((row - 1, col))
         if row < 7 and self.is_free_or_opponent(board, player, row + 1, col):
             allowed_movements.append((row + 1, col))
-
+        if check_castling and turn and not self.has_moved():
+            if self.is_castling_allowed(board, pieces, row, col, 0, turn):
+                allowed_movements.append((row, col - 2))
+            if self.is_castling_allowed(board, pieces, row, col, 7, turn):
+                allowed_movements.append((row, col + 2))
         return allowed_movements
+
+    def has_moved(self):
+        return self._moved
+
+    def is_castling_allowed(this, board, pieces, row, column, rook_column, player):
+        if board[row][rook_column].has_moved(): # if the rook has been moved before, it's not valid
+            return False
+
+        castling_side_factor = 1 if rook_column > column else -1
+        for i in range(column + castling_side_factor, rook_column, castling_side_factor):  # if there is a piece in the middle, it's not valid
+            if board[row][i] is not None:
+                return False
+        i = 0 # if it's a check between the king (including it) and two squares to the castling side, it's not valid
+        # from celery.contrib import rdb;rdb.set_trace()
+        opponent_color = WHITE if this.get_color() == BLACK else BLACK
+        opponent = True if player == False else False
+        while i <= 2:
+            column_to_analyze = column + i * castling_side_factor
+            opponent_movements = get_turn_allowed_movements(board, pieces, opponent_color, check_castling=False, turn=opponent)
+            if (row, column_to_analyze) in [movement[1] for movement in opponent_movements]:
+                return False
+            i += 1
+        return True
+
 
     def is_free_or_opponent(self, board, player, row, col):
         return board[row][col] is None or board[row][col].get_color() != player

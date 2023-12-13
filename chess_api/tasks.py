@@ -46,7 +46,7 @@ def process_movement_async(movement_id=None, game_id=None):
     for row_index, row in enumerate(board):
         for col_index, piece in enumerate(row):
             if piece is not None:
-                piece.change_position(row_index, col_index)
+                piece.change_position(row_index, col_index, moved=False)
                 pieces.append(piece) 
 
     # from celery.contrib import rdb;rdb.set_trace()

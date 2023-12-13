@@ -418,6 +418,11 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			setMovedPieces([...movedPieces]);
 		}
 		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], translatePiece(data.promoted))
+		if (board[movement.row][movement.column].value === KING && Math.abs(piece.column - movement.column) > 1) {
+			const rookColumn = movement.column < piece.column ? 0 : 7;
+			const movementDirection = movement.column < piece.column ? 1 : -1
+			movePiece(board[movement.row][rookColumn], board[movement.row][movement.column + movementDirection], null)
+		}
 		paintRecentlyMoved(piece.row, piece.column, movement.row, movement.column);
 		const movements = getAllowedMovements([...board], movedPieces, playerColor, PLAYER); // should be after movePiece finishes but it gets to the same result.
 		setAllowedMovements(movements);
