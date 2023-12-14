@@ -1,7 +1,7 @@
 from celery import shared_task
 from .models import Movement, Game
 from .pieces import Rook, Knight, Bishop, King, Queen, Pawn
-from .util import unParse
+from .util import isCastling, unParse
 from .constants import WHITE, BLACK, KING
 from .movements import get_movement
 
@@ -88,7 +88,3 @@ def process_movement_async(movement_id=None, game_id=None):
     return -1
 
 
-def isCastling(board, movement_row, movement_column, piece_column):
-    if board[movement_row][movement_column].get_name() == KING and abs(movement_column - piece_column) == 2:
-        return True
-    return False

@@ -1,5 +1,5 @@
 from .movements import get_turn_allowed_movements
-from .constants import KING, WHITE, BLACK
+from .constants import KING, ROOK, WHITE, BLACK
 
 
 class Piece(object):
@@ -23,8 +23,8 @@ class Piece(object):
     def get_color(self):
         return self._color
 
-    def get_score(self, player, turn=True, score=None):
-        return score if self.get_color() == player else -score
+    def get_score(self, player_permanent, turn=True, score=None):
+        return score if self.get_color() == player_permanent else -score
 
 
 class Knight(Piece):
@@ -340,7 +340,8 @@ class King(Piece):
         return self._moved
 
     def is_castling_allowed(this, board, pieces, row, column, rook_column, player):
-        if board[row][rook_column].has_moved(): # if the rook has been moved before, it's not valid
+        if board[row][rook_column] is None or board[row][rook_column].get_name() != ROOK \
+                            or board[row][rook_column].has_moved(): # if the rook has been moved before, it's not valid
             return False
 
         castling_side_factor = 1 if rook_column > column else -1
