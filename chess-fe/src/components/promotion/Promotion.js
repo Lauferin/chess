@@ -1,4 +1,5 @@
 import "./Promotion.css";
+import { WHITE, KNIGHT, BISHOP, ROOK, QUEEN } from "../../constants";
 import whiteKnight from '../pieces/knight/white_knight.svg'
 import whiteBishop from '../pieces/bishop/white_bishop.svg'
 import whiteRook from '../pieces/rook/white_rook.svg'
@@ -8,7 +9,7 @@ import blackBishop from '../pieces/bishop/black_bishop.svg'
 import blackRook from '../pieces/rook/black_rook.svg'
 import blackQueen from '../pieces/queen/black_queen.svg'
 
-const Promotion = ({ setPawnToPromote, move, row, column, player }) => {
+const Promotion = ({ setPawnToPromote, move, row, column, playerColor }) => {
 
 	const handleOptionClick = (promoteTo) => {
 		move(row, column, promoteTo);
@@ -20,10 +21,10 @@ const Promotion = ({ setPawnToPromote, move, row, column, player }) => {
 	};
 	
 	const options = [
-		{ id: 1, label: 'knight', imageUrl: player === "white" ? whiteKnight : blackKnight },
-		{ id: 2, label: 'bishop', imageUrl: player === "white" ? whiteBishop : blackBishop },
-		{ id: 3, label: 'rook', imageUrl: player === "white" ? whiteRook : blackRook },
-		{ id: 4, label: 'queen', imageUrl: player === "white" ? whiteQueen : blackQueen},
+		{ id: KNIGHT, label: 'knight', imageUrl: playerColor === WHITE ? whiteKnight : blackKnight },
+		{ id: BISHOP, label: 'bishop', imageUrl: playerColor === WHITE ? whiteBishop : blackBishop },
+		{ id: ROOK, label: 'rook', imageUrl: playerColor === WHITE ? whiteRook : blackRook },
+		{ id: QUEEN, label: 'queen', imageUrl: playerColor === WHITE ? whiteQueen : blackQueen},
 	];
 	
 	return (
@@ -34,7 +35,7 @@ const Promotion = ({ setPawnToPromote, move, row, column, player }) => {
 						key={option.id}
 						className={`option`}
 						// className={`option ${selectedOption === option.id ? 'selected' : ''}`}
-						onClick={() => handleOptionClick(option.label)}
+						onClick={() => handleOptionClick(option.id)}
 					>
 						<img src={option.imageUrl} alt={option.label} />
 					</div>

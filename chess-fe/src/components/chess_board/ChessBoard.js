@@ -5,7 +5,8 @@ import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
-import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, MOVEMENTS_URL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } from "../../constants";
+import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, MOVEMENTS_URL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, 
+	translatePromotionToName, translatePromotionToConstant} from "../../constants";
 // import { DRAWN } from "../../constants";
 
 const PLAYER = true;
@@ -403,7 +404,9 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			movedPieces[pickedColumn] = true;
 			setMovedPieces([...movedPieces]);
 		}
+		console.log(board[pickedRow][pickedColumn], promoted)
 		movePiece(board[pickedRow][pickedColumn], board[row][column], promoted)
+		console.log(board[row][column], promoted)
 		setPicked(null);
 		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
@@ -417,7 +420,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			movedPieces[movement.column] = true; // NO ANDA?
 			setMovedPieces([...movedPieces]);
 		}
-		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], translatePiece(data.promoted))
+		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], translatePromotionToConstant[data.promoted])
 		if (board[movement.row][movement.column].value === KING && Math.abs(piece.column - movement.column) > 1) {
 			const rookColumn = movement.column < piece.column ? 0 : 7;
 			const movementDirection = movement.column < piece.column ? 1 : -1
@@ -443,7 +446,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 
 	const sendMovement = (piece, movement, promoted) => {
 		// console.log("turn", turn, "game", game, "playerColor", playerColor)
-		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": promoted}
+		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": translatePromotionToName[promoted]}
 		// console.log(data)
 		try {
 			axios.post(MOVEMENTS_URL, data).then(response => {

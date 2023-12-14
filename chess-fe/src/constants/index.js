@@ -14,3 +14,17 @@ export const BISHOP = 3
 export const ROOK = 4
 export const QUEEN = 5
 export const KING = 6
+
+export const translatePromotionToConstant = {
+    "knight": KNIGHT,
+    "bishop": BISHOP,
+    "rook": ROOK,
+    "queen": QUEEN
+}
+
+export const translatePromotionToName = {
+    KNIGHT: "knight",
+    BISHOP: "bishop",
+    ROOK: "rook",
+    QUEEN: "queen"
+}

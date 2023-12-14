@@ -275,7 +275,7 @@ class Pawn(Piece):
         if row == promotionPosition:
             if board[row + forward][col] is None:
                 allowed_movements.extend([(row + forward, col, promotion) for promotion in self.promotions])
-        elif board[row + forward][col] is None:
+        elif board[row + forward][col] is None: # failing
             allowed_movements.append((row + forward, col))
             if row == initialPosition and board[row + 2 * forward][col] is None:
                 allowed_movements.append((row + 2 * forward, col))
