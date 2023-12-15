@@ -446,7 +446,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 
 	const sendMovement = (piece, movement, promoted) => {
 		// console.log("turn", turn, "game", game, "playerColor", playerColor)
-		console.log(promoted, translatePromotionToName[promoted])
 		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": translatePromotionToName[promoted]}
 		// console.log(data)
 		try {
