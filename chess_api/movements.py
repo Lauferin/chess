@@ -61,6 +61,30 @@ class Game(object):
 
         return Game(board=board, pieces=pieces, player_permanent=self.player_permanent, player=not self.player)
 
+
+    def get_allowed_movements(self, turn=True):
+        movements = get_turn_allowed_movements(self.board, self.pieces, self.player, turn=turn)
+        movements_without_check = []
+
+        for movement in movements:
+            piece_row = movement[0][0]
+            piece_col = movement[0][1]
+            movement_row = movement[1][0]
+            movement_col = movement[1][1]
+            board = deepcopy(self.board)
+            # make pieces from scratch, since we deep-copied the board, and we want to be able to compair with it
+            board[movement_row][movement_col] = board[piece_row][piece_col]
+            board[movement_row][movement_col].change_position(movement_row, movement_col)
+            board[piece_row][piece_col] = None
+            pieces = [piece for row in board for piece in row if piece is not None]
+            score = get_score(pieces, self.player, movement[1])
+            king = [piece for piece in pieces if piece is not None and piece.get_name() == KING and piece.get_color() == self.player][0]
+            opponentMovements = get_turn_allowed_movements(board, pieces, not self.player, turn=not turn)
+            if king.get_position() not in [(movement[1][0], movement[1][1]) for movement in opponentMovements]: # not just movement(1) because of promotions
+                movements_without_check.append(movement + (score, ))
+            # add castling and promotion, not for checkmate but for thinking ahead
+        return movements_without_check
+
     def get_best_movement(self, depth):
 
         def maxValue(state, depth, alpha, beta):
@@ -147,7 +171,7 @@ def get_turn_allowed_movements(board, pieces, player, check_castling=True, turn=
 def get_allowed_movements(board, pieces, player, turn=True):
     movements = get_turn_allowed_movements(board, pieces, player, turn=turn)
     opponent = BLACK if player == WHITE else WHITE
-    movements_without_check = []        # from celery.contrib import rdb;rdb.set_trace()
+    movements_without_check = []
 
     # from celery.contrib import rdb;rdb.set_trace()
     for movement in movements:
@@ -174,8 +198,9 @@ def get_allowed_movements(board, pieces, player, turn=True):
 def get_movement(board, pieces, player, algorithm):
     
     def basic():
-
-        allowed_movements = get_allowed_movements(board, pieces, player)
+        state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
+        # from celery.contrib import rdb;rdb.set_trace()
+        allowed_movements = state.get_allowed_movements()
         if len(allowed_movements) == 0:
             return move(board, None, player, True)
         selected = random.choice(allowed_movements)
@@ -207,11 +232,17 @@ def get_movement(board, pieces, player, algorithm):
         movement = state.get_best_movement(depth=1)
         return move(None, movement, player, False)
 
+    def advanced():
+
+        state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
+        movement = state.get_best_movement(depth=2)
+        return move(None, movement, player, False)
 
     algorithms = {
         "basic": basic,
         "beginner": beginner,
         "intermediate": intermediate,
+        "advanced": advanced,
     }
 
     return algorithms.get(algorithm, basic)()

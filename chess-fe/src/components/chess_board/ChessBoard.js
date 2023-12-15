@@ -446,6 +446,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 
 	const sendMovement = (piece, movement, promoted) => {
 		// console.log("turn", turn, "game", game, "playerColor", playerColor)
+		console.log(promoted, translatePromotionToName[promoted])
 		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": translatePromotionToName[promoted]}
 		// console.log(data)
 		try {
@@ -476,16 +477,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const columnResult = playerColor === WHITE ? position.charCodeAt(0) - 97 : 7 - position.charCodeAt(0) + 97;
 		const rowResult = playerColor === BLACK ? position[1] - 1 : 8 - position[1]; 
 		return {"row": rowResult, "column": columnResult};
-	}
-
-	const translatePiece = (piece) => {
-		switch(piece) {
-			case "rook": return ROOK;
-			case "queen": return QUEEN;
-			case "bishop": return BISHOP;
-			case "knight": return KNIGHT
-			default: return piece;
-		}
 	}
 
 	useEffect(() => {

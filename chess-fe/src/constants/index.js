@@ -23,8 +23,8 @@ export const translatePromotionToConstant = {
 }
 
 export const translatePromotionToName = {
-    KNIGHT: "knight",
-    BISHOP: "bishop",
-    ROOK: "rook",
-    QUEEN: "queen"
+    [KNIGHT]: "knight",
+    [BISHOP]: "bishop",
+    [ROOK]: "rook",
+    [QUEEN]: "queen"
 }
