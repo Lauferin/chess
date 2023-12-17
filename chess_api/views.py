@@ -66,25 +66,3 @@ class MovementDetailView(APIView):
         movement = self.get_object(pk)
         movement.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def movements_detail(request, pk):
-#     try:
-#         movement = Movement.objects.get(pk=pk)
-#     except Movement.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-
-#     if request.method == 'GET':
-#         serializer = MovementSerializer(movement, context={'request': request})
-#         return Response(serializer.data)
-
-#     if request.method == 'PUT':
-#         serializer = MovementSerializer(movement, data=request.data, context={'request': request})
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(status=status.HTTP_204_NO_CONTENT)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-#     elif request.method == 'DELETE':
-#         movement.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)

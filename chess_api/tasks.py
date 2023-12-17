@@ -1,7 +1,7 @@
 from celery import shared_task
 from .models import Movement, Game
 from .pieces import Rook, Knight, Bishop, King, Queen, Pawn
-from .util import isCastling, unParse
+from .util import is_castling, unparse
 from .constants import WHITE, BLACK, KING
 from .movements import get_movement
 
@@ -51,15 +51,15 @@ def process_movement_async(movement_id=None, game_id=None):
 
     # from celery.contrib import rdb;rdb.set_trace()
     for movement in movements_array:
-        piece_column, piece_row = unParse(movement["piece"], player)
-        movement_column, movement_row = unParse(movement["movement"], player)
+        piece_column, piece_row = unparse(movement["piece"], player)
+        movement_column, movement_row = unparse(movement["movement"], player)
         if board[movement_row][movement_column] is not None:
             pieces = [piece for piece in pieces if piece.get_position() != (movement_row, movement_column)]
         board[movement_row][movement_column] = board[piece_row][piece_column]
         board[movement_row][movement_column].change_position(movement_row, movement_column)
         board[piece_row][piece_column] = None
 
-        if isCastling(board, movement_row, movement_column, piece_column):
+        if is_castling(board, movement_row, movement_column, piece_column):
             # from celery.contrib import rdb;rdb.set_trace()
             rook_column = 0 if movement_column < piece_column else 7
             movement_direction = 1 if movement_column < piece_column else -1

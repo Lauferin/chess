@@ -2,18 +2,10 @@ from operator import ge
 from webbrowser import get
 
 from .constants import BLACK, KING, WHITE
-from .util import isCastling, parse
+from .util import is_castling, parse
 from copy import deepcopy
-# from .pieces import Knight, Bishop, Rook, Queen
 import random
 
-
-# promotion_pieces = {
-#     "knight": Knight,
-#     "bishop": Bishop,
-#     "rook": Rook,
-#     "queen": Queen
-# }
 
 class Game(object):
 
@@ -35,17 +27,15 @@ class Game(object):
         board[movement_row][movement_column] = board[piece_row][piece_column]
         board[movement_row][movement_column].change_position(movement_row, movement_column)
         board[piece_row][piece_column] = None
-
-        if isCastling(board, movement_row, movement_column, piece_column):
-            # from celery.contrib import rdb;rdb.set_trace()
+        if is_castling(board, movement_row, movement_column, piece_column):
             rook_column = 0 if movement_column < piece_column else 7
             movement_direction = 1 if movement_column < piece_column else -1
             board[movement_row][movement_column + movement_direction] = board[piece_row][rook_column]
             board[movement_row][movement_column + movement_direction].change_position(movement_row, movement_column + movement_direction)
             board[piece_row][rook_column] = None
-        # if movement["promoted"] != None:
-        #     board[movement_row][movement_column] = promotion_pieces[movement[1][2]](movement["player"])
-        #     board[movement_row][movement_column].change_position(movement_row, movement_column)
+        if len(movement[1]) == 3:
+            board[movement_row][movement_column] = movement[1][2](self.player)
+            board[movement_row][movement_column].change_position(movement_row, movement_column)
 
         pieces = []
         for row_index, row in enumerate(board):

@@ -6,13 +6,13 @@ def parse(row, column, player):
     return f"{columnResult}{rowResult}"
 
 
-def unParse(position, player):
+def unparse(position, player):
     columnResult = ord(position[0]) - 97 if player == BLACK else 7 - ord(position[0]) + 97
     rowResult = int(position[1]) - 1 if player == WHITE else 8 - int(position[1]); 
     return columnResult, rowResult
 
 
-def isCastling(board, movement_row, movement_column, piece_column):
+def is_castling(board, movement_row, movement_column, piece_column):
     if board[movement_row][movement_column].get_name() == KING and abs(movement_column - piece_column) == 2:
         return True
     return False

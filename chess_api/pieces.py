@@ -270,22 +270,22 @@ class Pawn(Piece):
         row, col = self._row, self._col
         allowed_movements = []
         forward = 1 if turn else -1
-        initialPosition = 1 if turn else 6
-        promotionPosition = 6 if turn else 1
-        if row == promotionPosition:
+        initial_position = 1 if turn else 6
+        promotion_position = 6 if turn else 1
+        if row == promotion_position:
             if board[row + forward][col] is None:
                 allowed_movements.extend([(row + forward, col, promotion) for promotion in self.promotions])
-        elif board[row + forward][col] is None: # failing
+        elif board[row + forward][col] is None:
             allowed_movements.append((row + forward, col))
-            if row == initialPosition and board[row + 2 * forward][col] is None:
+            if row == initial_position and board[row + 2 * forward][col] is None:
                 allowed_movements.append((row + 2 * forward, col))
         if col > 0 and board[row + forward][col - 1] is not None and board[row + forward][col - 1].get_color() != player:
-            if row == promotionPosition:
+            if row == promotion_position:
                 allowed_movements.extend([(row + forward, col - 1, promotion) for promotion in self.promotions])
             else:
                 allowed_movements.append((row + forward, col - 1))
         if col < 7 and board[row + forward][col + 1] is not None and board[row + forward][col + 1].get_color() != player:
-            if row == promotionPosition:
+            if row == promotion_position:
                 allowed_movements.extend([(row + forward, col + 1, promotion) for promotion in self.promotions])
             else:
                 allowed_movements.append((row + forward, col + 1))
