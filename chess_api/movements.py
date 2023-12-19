@@ -106,7 +106,54 @@ class Game(object):
         # from celery.contrib import rdb;rdb.set_trace()
         _ , move = maxValue(self, depth, -999999, 999999)
 
-        return move
+        return [move]
+
+
+    def get_best_movements(self, depth):
+
+        def maxValue(state, depth, alpha, beta):
+            if depth == 0: # stop condition of the recursion
+                return state.get_score(), None
+            allowed_movements = state.get_allowed_movements()
+            print("a", allowed_movements)
+            if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
+                return 0, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
+            depth -= 1
+            v = -999999
+
+            movements = []
+            for movement in allowed_movements:
+                successor = state.generate_successor(movement)
+                v2, _ = minValue(successor, depth, alpha, beta)
+                if v2 > v:
+                    v, movements = v2, [movement]
+                    alpha = max(alpha, v)
+                elif v2 == v:
+                    movements.append(movement)
+                if v > beta:
+                    return v, movements
+            return v, movements
+
+        def minValue(state, depth, alpha, beta):
+            allowed_movements = state.get_allowed_movements(turn=False)
+            if len(allowed_movements) == 0:
+                return 0, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
+            v = 999999
+
+            for movement in allowed_movements:
+                successor = state.generate_successor(movement)
+                v2, _ = maxValue(successor, depth, alpha, beta)
+                if v2 < v:
+                    v = v2
+                    beta = min(beta, v)
+                if v < alpha:
+                    return v, _
+            return v, _
+
+        # from celery.contrib import rdb;rdb.set_trace()
+        _ , movements = maxValue(self, depth, -999999, 999999)
+        print("b", movements)
+        return movements
 
 
 def move(board, selected, player, state):
@@ -162,13 +209,19 @@ def get_movement(board, pieces, player, algorithm):
 
     def intermediate():
         state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
-        movement = state.get_best_movement(depth=1)
-        return move(None, movement, player, False)
+        best_movements = state.get_best_movements(depth=1)
+        if len(best_movements) == 0:
+            return move(board, None, player, True)
+        selected = random.choice(best_movements)
+        return move(None, selected, player, False)
 
     def advanced():
         state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
-        movement = state.get_best_movement(depth=2)
-        return move(None, movement, player, False)
+        best_movements = state.get_best_movements(depth=2)
+        if len(best_movements) == 0:
+            return move(board, None, player, True)
+        selected = random.choice(best_movements)
+        return move(None, selected, player, False)
 
     algorithms = {
         "basic": basic,
