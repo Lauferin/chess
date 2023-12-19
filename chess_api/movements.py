@@ -73,7 +73,7 @@ class Game(object):
                 return state.get_score(), None
             allowed_movements = state.get_allowed_movements()
             if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
-                return 0, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
+                return 0, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
             depth -= 1
             v = -999999
 
@@ -115,9 +115,8 @@ class Game(object):
             if depth == 0: # stop condition of the recursion
                 return state.get_score(), None
             allowed_movements = state.get_allowed_movements()
-            print("a", allowed_movements)
             if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
-                return 0, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
+                return -999999, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
             depth -= 1
             v = -999999
 
@@ -137,7 +136,7 @@ class Game(object):
         def minValue(state, depth, alpha, beta):
             allowed_movements = state.get_allowed_movements(turn=False)
             if len(allowed_movements) == 0:
-                return 0, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
+                return 999999, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
             v = 999999
 
             for movement in allowed_movements:
@@ -152,7 +151,6 @@ class Game(object):
 
         # from celery.contrib import rdb;rdb.set_trace()
         _ , movements = maxValue(self, depth, -999999, 999999)
-        print("b", movements)
         return movements
 
 
