@@ -1,6 +1,6 @@
 This is a chess game, user against the computer.
 
-This project is still in development.
+This project is still under development.
 
 
 In order to install all the project after you clone:

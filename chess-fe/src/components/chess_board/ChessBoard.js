@@ -78,7 +78,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const movements = [];
 		const forward = turn ? 1 : -1;
 		const initialPosition = turn ? 6 : 1;
-		console.log("row & forward", row, forward)
 		if (board[row - forward][column].value === null) {
 			movements.push([row - forward, column]);
 			if (row === initialPosition && board[row - 2 * forward][column].value === null) {

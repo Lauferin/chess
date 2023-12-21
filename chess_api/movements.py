@@ -46,6 +46,14 @@ class Game(object):
         
         return Game(board=board, pieces=pieces, player_permanent=self.player_permanent, player=not self.player)
 
+    def get_turn_allowed_movements(self, check_castling=True, turn=True):
+        allowed_movements = []
+        player_pieces = [piece for piece in self.pieces if piece.get_color() == self.player]
+        for piece in player_pieces:
+            allowed_movements += [(piece.get_position(), movement) for movement in 
+                piece.get_allowed_movements(self.board, self.pieces, self.player, check_castling, turn=turn)]
+        return allowed_movements
+
     def get_allowed_movements(self, turn=True):
         movements = get_turn_allowed_movements(self.board, self.pieces, self.player, turn=turn)
         movements_without_check = []
@@ -65,49 +73,6 @@ class Game(object):
             if king.get_position() not in [(movement[1][0], movement[1][1]) for movement in opponentMovements]: # not just movement(1) because of promotions
                 movements_without_check.append(movement)
         return movements_without_check
-
-    def get_best_movement(self, depth):
-
-        def maxValue(state, depth, alpha, beta):
-            if depth == 0: # stop condition of the recursion
-                return state.get_score(), None
-            allowed_movements = state.get_allowed_movements()
-            if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
-                return 0, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
-            depth -= 1
-            v = -999999
-
-            for movement in allowed_movements:
-                successor = state.generate_successor(movement)
-                v2, _ = minValue(successor, depth, alpha, beta)
-                if v2 > v:
-                    v, move = v2, movement
-                    alpha = max(alpha, v)
-                if v > beta:
-                    return v, move
-            return v, move
-
-        def minValue(state, depth, alpha, beta):
-            allowed_movements = state.get_allowed_movements(turn=False)
-            if len(allowed_movements) == 0:
-                return 0, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
-            v = 999999
-
-            for movement in allowed_movements:
-                successor = state.generate_successor(movement)
-                v2, _ = maxValue(successor, depth, alpha, beta)
-                if v2 < v:
-                    v = v2
-                    beta = min(beta, v)
-                if v < alpha:
-                    return v, _
-            return v, _
-
-        # from celery.contrib import rdb;rdb.set_trace()
-        _ , move = maxValue(self, depth, -999999, 999999)
-
-        return [move]
-
 
     def get_best_movements(self, depth):
 
@@ -134,9 +99,12 @@ class Game(object):
             return v, movements
 
         def minValue(state, depth, alpha, beta):
+            if depth == 0: # stop condition of the recursion
+                return state.get_score(), None
             allowed_movements = state.get_allowed_movements(turn=False)
             if len(allowed_movements) == 0:
                 return 999999, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
+            depth -= 1
             v = 999999
 
             for movement in allowed_movements:
@@ -207,7 +175,7 @@ def get_movement(board, pieces, player, algorithm):
 
     def intermediate():
         state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
-        best_movements = state.get_best_movements(depth=1)
+        best_movements = state.get_best_movements(depth=2)
         if len(best_movements) == 0:
             return move(board, None, player, True)
         selected = random.choice(best_movements)
@@ -215,7 +183,7 @@ def get_movement(board, pieces, player, algorithm):
 
     def advanced():
         state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
-        best_movements = state.get_best_movements(depth=2)
+        best_movements = state.get_best_movements(depth=3)
         if len(best_movements) == 0:
             return move(board, None, player, True)
         selected = random.choice(best_movements)
