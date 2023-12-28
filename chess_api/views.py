@@ -17,7 +17,6 @@ class GameListView(generics.ListCreateAPIView):
         serializer.save()
         movement_instance = serializer.instance
         if movement_instance.player_color == False: # the user is black, we're white
-            print("ENTERING")
             process_movement_async.delay(game_id=movement_instance.id)
         return Response(serializer.data)
 

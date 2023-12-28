@@ -287,6 +287,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const castlingSideFactor = rookColumn > column ? 1 : -1;
 		let i = column + castlingSideFactor; // if there is a piece in the middle, it's not valid
 		while (i !== rookColumn) {
+			console.log("row", row, "i", i, "column", column, "castlingsidefactor", castlingSideFactor, "rookColumn", rookColumn)
 			if (board[row][i].value !== null) {
 				return false;
 			}
@@ -525,7 +526,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			setTurn(OPPONENT);
 			setLastMovement(0) // not null, so it asks for opponent's movement
 		}
-		// the following line is not exactly a comment, it disables the warning of not adding the function moveOpponent. Don't remove.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [game, playerColor, opponentColor]);
 
@@ -553,7 +553,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 	
 			return () => clearInterval(interval);
 		}
-		// the following line is not exactly a comment, it disables the warning of not adding the function moveOpponent. Don't remove.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [lastMovement]);
 

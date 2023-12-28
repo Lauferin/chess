@@ -1,30 +1,66 @@
-.App {
-  text-align: center;
-	background-color: #285c24;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  /* min-height: 100vh; */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #285c24 !important;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-height: 100vh;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.container {
+  text-align: center;
+}
+
+.chessboard-container {
+  margin-top: 20px;
+  padding-top: 0px;
+}
+
+.select-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  color: #379207 !important;
+  padding: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Subtle text shadow */
+
+}
+
+.select-label {
+  margin-right: 10px;
+  color: #4ac050; /* Green color for "Select Difficulty" and "Select Color" labels */
+}
+
+.start-button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+}
+
+.start-button:hover {
+  background-color: #45a049;
+}
+
+.game-status-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: #3498db;
+  color: #fff;
+  border-radius: 5px;
+  display: inline-block;
+  z-index: 999; /* Ensure it appears above the chessboard */
 }
