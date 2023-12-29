@@ -1,7 +1,8 @@
+from lib2to3.pgen2.token import OP
 from operator import ge
 from webbrowser import get
 
-from .constants import BLACK, KING, WHITE
+from .constants import BLACK, KING, WHITE, PLAYER, OPPONENT
 from .util import is_castling, parse
 from copy import deepcopy
 import random
@@ -16,8 +17,13 @@ class Game(object):
         self.player = player
         self.player_permanent = player_permanent
 
-    def get_score(self):
-        return sum(piece.get_score(self.player_permanent) for piece in self.pieces)
+    def get_score(self, advantage):
+        score = sum(piece.get_score(self.player_permanent) for piece in self.pieces)
+        if advantage == OPPONENT:
+            return score - get_king_corner_score(self.pieces, self.player_permanent)
+        elif advantage == PLAYER:
+            return score + get_king_corner_score(self.pieces, not self.player_permanent)
+        return score
 
     def generate_successor(self, movement):
         board = deepcopy(self.board)
@@ -78,11 +84,11 @@ class Game(object):
                 movements_without_check.append(movement)
         return movements_without_check
 
-    def get_best_movements(self, depth):
+    def get_best_movements(self, depth, advanced=False):
 
-        def maxValue(state, depth, alpha, beta):
+        def maxValue(state, advantage, advanced, depth, alpha, beta):
             if depth == 0: # stop condition of the recursion
-                return state.get_score(), None
+                return state.get_score(advantage), None
             allowed_movements = state.get_allowed_movements()
             if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
                 return -999999, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
@@ -92,7 +98,7 @@ class Game(object):
             movements = []
             for movement in allowed_movements:
                 successor = state.generate_successor(movement)
-                v2, _ = minValue(successor, depth, alpha, beta)
+                v2, _ = minValue(successor, advantage, advanced, depth, alpha, beta)
                 if v2 > v:
                     v, movements = v2, [movement]
                     alpha = max(alpha, v)
@@ -102,70 +108,21 @@ class Game(object):
                     return v, movements
             return v, movements
 
-        def minValue(state, depth, alpha, beta):
+        def minValue(state, advantage, advanced, depth, alpha, beta):
             if depth == 0: # stop condition of the recursion
-                return state.get_score(), None
-            allowed_movements = state.get_allowed_movements(turn=False)
-            if len(allowed_movements) == 0:
-                return 999999, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
-            depth -= 1
-            v = 999999
-
-            for movement in allowed_movements:
-                successor = state.generate_successor(movement)
-                v2, _ = maxValue(successor, depth, alpha, beta)
-                if v2 < v:
-                    v = v2
-                    beta = min(beta, v)
-                if v < alpha:
-                    return v, _
-            return v, _
-
-        # from celery.contrib import rdb;rdb.set_trace()
-        _ , movements = maxValue(self, depth, -999999, 999999)
-        return movements
-
-
-    def get_best_movements_advanced(self, depth):
-        """
-        This is a copy of get_best_movements with some changes. It could have been done in one method instead of code repeating,
-        but for now we're mantaining them separately in order not to turn the code dirty and to avoid some unnecessary operations
-        since we're dealing with a high complexity.
-        """
-        def maxValue(state, depth, alpha, beta):
-            if depth == max_depth: # stop condition of the recursion
-                return state.get_score(), None
-            allowed_movements = state.get_allowed_movements()
-            if len(allowed_movements) == 0: # we don't do this with the depth so it doesn't calculate them unnecessarily
-                return -999999, [] # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (-999999)
-            v = -999999
-
-            movements = []
-            for movement in allowed_movements:
-                successor = state.generate_successor(movement)
-                v2, _ = minValue(successor, depth, alpha, beta)
-                if v2 > v:
-                    v, movements = v2, [movement]
-                    alpha = max(alpha, v)
-                elif v2 == v:
-                    movements.append(movement)
-                if v > beta:
-                    return v, movements
-            return v, movements
-
-        def minValue(state, depth, alpha, beta):
-            if depth == max_depth - 2:
+                return state.get_score(advantage), None
+            if advanced == True and depth == 1:
                 allowed_movements = state.get_turn_allowed_movements(turn=False)
             else:
                 allowed_movements = state.get_allowed_movements(turn=False)
             if len(allowed_movements) == 0:
                 return 999999, None # WE SHOULD CHECK HERE WHETHER IT'S DRAWN (0) OR CHECKMATE (999999)
+            depth -= 1
             v = 999999
-            depth += 2
 
             for movement in allowed_movements:
                 successor = state.generate_successor(movement)
-                v2, _ = maxValue(successor, depth, alpha, beta)
+                v2, _ = maxValue(successor, advantage, advanced, depth, alpha, beta)
                 if v2 < v:
                     v = v2
                     beta = min(beta, v)
@@ -174,8 +131,26 @@ class Game(object):
             return v, _
 
         # from celery.contrib import rdb;rdb.set_trace()
-        max_depth = depth
-        _ , movements = maxValue(self, 0, -999999, 999999)
+        total_player_pieces = 0
+        total_opponent_pieces = 0
+        for piece in self.pieces:
+            if piece.get_color() == self.player_permanent:
+                total_player_pieces += 1
+            else:
+                total_opponent_pieces += 1
+        advantage = None
+        if total_player_pieces == 1 or total_opponent_pieces == 1:
+            if total_player_pieces == 1:
+                advantage = OPPONENT
+            else:
+                advantage = PLAYER
+            depth += 2
+            if total_player_pieces + total_opponent_pieces == 3:
+                depth += 1
+
+        # FUNCTION HOW MANY PIECES THERE ARE AND WHICH
+
+        _ , movements = maxValue(self, advantage, advanced, depth, -999999, 999999)
         return movements
 
 
@@ -208,6 +183,15 @@ def get_turn_allowed_movements(board, pieces, player, check_castling=True, turn=
     for piece in player_pieces:
         allowed_movements += [(piece.get_position(), movement) for movement in piece.get_allowed_movements(board, pieces, player, check_castling, turn=turn)]
     return allowed_movements
+
+
+def get_king_corner_score(pieces, player):
+
+    for piece in pieces:
+        if piece.get_name() == KING and piece.get_color() == player:
+            king = piece
+    row, col = king.get_position()
+    return abs(row * 2 - 7) + abs(col * 2 - 7)
 
 
 def get_movement(board, pieces, player, algorithm):
@@ -248,13 +232,14 @@ def get_movement(board, pieces, player, algorithm):
 
     def advanced():
         state = Game(board=board, pieces=pieces, player=player, player_permanent=player)
-        best_movements = state.get_best_movements_advanced(depth=4)
+        best_movements = state.get_best_movements(depth=4, advanced=True)
         if len(best_movements) == 0:
             return move(board, None, player, True)
         selected = random.choice(best_movements)
         return move(None, selected, player, False)
 
     algorithms = {
+        "random_movements": random_movements,
         "basic": basic,
         "beginner": beginner,
         "intermediate": intermediate,
