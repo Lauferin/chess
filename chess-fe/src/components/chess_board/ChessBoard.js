@@ -269,7 +269,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		if (row < 7 && board[row + 1][column].valueColor !== playerColor) {
 			movements.push([row + 1, column]);
 		}
-		if (turn && movedPieces[column] === false) {
+		if (turn && movedPieces[column] === false) { // this should calculate if the king moved, not the current column
 			if (isCastlingAllowed(board, movedPieces, row, column, 0, playerColor, turn)) {
 				movements.push([7, column - 2]);
 			}

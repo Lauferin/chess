@@ -144,7 +144,8 @@ class Game(object):
                 advantage = OPPONENT
             else:
                 advantage = PLAYER
-            depth += 2
+            depth = 4
+            advanced = False
             if total_player_pieces + total_opponent_pieces == 3:
                 depth += 1
 
