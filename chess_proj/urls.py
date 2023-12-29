@@ -15,14 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
-from chess_api import views
-from django.views.decorators.csrf import csrf_exempt
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/movements/', views.MovementListView.as_view(), name='movement-list'),
-    path('movements/<int:pk>/', views.MovementDetailView.as_view(), name='movement-detail'),
-    # re_path(r'^api/movements/([0-9]+)$', views.movements_detail),
-    path('api/games/', views.GameListView.as_view(), name='game-list'),
+    path('api/', include('chess_api.urls')),  # Include the chess_api.urls
 ]
