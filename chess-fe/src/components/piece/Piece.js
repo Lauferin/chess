@@ -1,10 +1,11 @@
 import { useDrag, useDrop } from 'react-dnd';
-import Rook from '../pieces/rook/Rook.js';
-import Pawn from '../pieces/pawn/Pawn.js';
-import Queen from '../pieces/queen/Queen.js';
-import King from '../pieces/king/King.js';
-import Knight from '../pieces//knight/Knight.js';
-import Bishop from '../pieces/bishop/Bishop.js';
+import "./Piece.css";
+import Rook from './rook/Rook.js';
+import Pawn from './pawn/Pawn.js';
+import Queen from './queen/Queen.js';
+import King from './king/King.js';
+import Knight from './knight/Knight.js';
+import Bishop from './bishop/Bishop.js';
 import { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } from "../../constants";
 
 
@@ -33,7 +34,7 @@ const Piece = ({ nature, row, column, pieceColor, handleCellClicked }) => {
 	}[nature];
 
 	return (
-		<div ref={(node) => drag(drop(node))}>
+		<div className="piece" ref={(node) => drag(drop(node))}>
 			{PieceComponent && (
 				<PieceComponent pieceColor={pieceColor} row={row} column={column} handleCellClicked={handleCellClicked} />
 			)}

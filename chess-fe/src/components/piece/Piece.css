@@ -1,0 +1,11 @@
+.piece {
+  margin: 0px;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+}
+
+.piece-image {
+  width: 100%;
+  padding: 10px;
+}

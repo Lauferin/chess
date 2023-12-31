@@ -1,7 +1,5 @@
 .ChessBoard-board {
-	margin: 5px;
-	justify-content: center;
-	/* background-color: #285c24; */
+	margin: 30px;
 	min-height: 90vh;
 	display: flex;
 	flex-direction: column;
@@ -11,8 +9,8 @@
 }
 
 .ChessBoard-cell {
-	height: 60px;
-	width: 60px;
+	height: 67px;
+	width: 67px;
 	text-align: center;
 	user-select: none;
 }
