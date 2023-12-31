@@ -479,6 +479,10 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		return {"row": rowResult, "column": columnResult};
 	}
 
+	const turnNumberToLetter = (number) => {
+		return String.fromCharCode(number + 'a'.charCodeAt(0))
+	}
+
 	useEffect(() => {
 		if (playerColor === null || game < 0) { // game < 0 means the game is not active (checkmate or something)
 			return;
@@ -564,16 +568,26 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 				<tbody>
 					{board.map((row, rowIndex) => (
 						<tr key={rowIndex}>
-							{row.map((cell, cellIndex) => (
-								<td 
-									key={cellIndex}
+							{row.map((cell, colIndex) => (
+								<td
+									key={colIndex}
 									className="ChessBoard-cell"
 									style={{ backgroundColor: cell.cellColor}}
 								>
-									{pawnToPromote === cellIndex && rowIndex === 0 && 
-										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={cellIndex} playerColor={playerColor} />}
+									{pawnToPromote === colIndex && rowIndex === 0 && 
+										<Promotion setPawnToPromote={setPawnToPromote} move={move} row={rowIndex} column={colIndex} playerColor={playerColor} />}
 									<Piece 
-										nature={cell.value} row={rowIndex} column={cellIndex} pieceColor={cell.valueColor} handleCellClicked={handleCellClicked} />
+										nature={cell.value} row={rowIndex} column={colIndex} pieceColor={cell.valueColor} handleCellClicked={handleCellClicked} />
+									{colIndex === 0 &&
+										<div className={`chessBoard-position ${rowIndex % 2 === Number(playerColor) ? "gray" : ""}`}>
+											{playerColor === WHITE ? 8 - rowIndex : rowIndex + 1}
+										</div>
+									}
+									{rowIndex === 7 &&
+										<div className={`chessBoard-position letter ${colIndex % 2 === Number(playerColor) ? "" : "gray"}`}>
+											{playerColor === WHITE ? turnNumberToLetter(colIndex) : turnNumberToLetter(7 - colIndex)}
+										</div>
+									}
 								</td>
 							))}
 						</tr>

@@ -13,7 +13,26 @@
 	width: 67px;
 	text-align: center;
 	user-select: none;
+	position: relative;
 }
  
+.chessBoard-position {
+	position: absolute;
+	top: 15%;
+	left: 10%;
+	transform: translate(-50%, -50%);
+	font-size: 15px;
+	font-weight: bold;
+	color: white;
+	display: inline-block;
+	z-index: 999; /* Ensure it appears above the chessboard */
+}
 
+.chessBoard-position.gray {
+	color: gray;
+}
 
+.chessBoard-position.letter {
+	top: 85%;
+	left: 90%;
+}  

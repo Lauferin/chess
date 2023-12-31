@@ -62,5 +62,5 @@ h1 {
   color: #fff;
   border-radius: 5px;
   display: inline-block;
-  z-index: 999; /* Ensure it appears above the chessboard */
+  z-index: 999;
 }
