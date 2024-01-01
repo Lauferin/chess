@@ -1,13 +1,13 @@
 import "./Promotion.css";
 import { WHITE, KNIGHT, BISHOP, ROOK, QUEEN } from "../../constants";
-import whiteKnight from '../pieces/knight/white_knight.svg'
-import whiteBishop from '../pieces/bishop/white_bishop.svg'
-import whiteRook from '../pieces/rook/white_rook.svg'
-import whiteQueen from '../pieces/queen/white_queen.svg'
-import blackKnight from '../pieces/knight/black_knight.svg'
-import blackBishop from '../pieces/bishop/black_bishop.svg'
-import blackRook from '../pieces/rook/black_rook.svg'
-import blackQueen from '../pieces/queen/black_queen.svg'
+import whiteKnight from '../piece/knight/white_knight.svg'
+import whiteBishop from '../piece/bishop/white_bishop.svg'
+import whiteRook from '../piece/rook/white_rook.svg'
+import whiteQueen from '../piece/queen/white_queen.svg'
+import blackKnight from '../piece/knight/black_knight.svg'
+import blackBishop from '../piece/bishop/black_bishop.svg'
+import blackRook from '../piece/rook/black_rook.svg'
+import blackQueen from '../piece/queen/black_queen.svg'
 
 const Promotion = ({ setPawnToPromote, move, row, column, playerColor }) => {
 
