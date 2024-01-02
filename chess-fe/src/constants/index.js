@@ -14,6 +14,8 @@ export const BISHOP = 3
 export const ROOK = 4
 export const QUEEN = 5
 export const KING = 6
+export const LEFTROOK = 7
+export const RIGHTROOK = 8
 
 export const translatePromotionToConstant = {
     "knight": KNIGHT,

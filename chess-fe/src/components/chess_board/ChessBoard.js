@@ -6,7 +6,7 @@ import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
 import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, MOVEMENTS_URL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, 
-	translatePromotionToName, translatePromotionToConstant} from "../../constants";
+	translatePromotionToName, translatePromotionToConstant, LEFTROOK, RIGHTROOK} from "../../constants";
 // import { DRAWN } from "../../constants";
 
 const PLAYER = true;
@@ -29,7 +29,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		if (turn === OPPONENT) {
 			return;
 		}
-		// console.log("row", rowIndex, "column", columnIndex)
 		const cellBoard = board[rowIndex][columnIndex]
 		if (picked) {  // If a cell was previously picked
 			const { pickedRow, pickedColumn } = picked;
@@ -47,7 +46,6 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 					pickedCell.cellColor = !!((pickedRow + pickedColumn) % 2) === playerColor ? 'white' : 'gray'; // reset its color
 					setPawnToPromote(-1);
 				} else { // it wants to move there
-					// console.log("allowed", allowedMovements)
 					if (includesArray(allowedMovements, [pickedRow, pickedColumn], [rowIndex, columnIndex])) { // it's legal
 						if (rowIndex === 0 && pickedCell.value === PAWN) { // a pawn has got to the edge
 							setPawnToPromote(columnIndex)
@@ -63,7 +61,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 				setPicked({ pickedRow: rowIndex, pickedColumn: columnIndex });
 				cellBoard.cellColor = 'red'; 
 			} else {
-				console.log("opponent piece!")
+				console.log("not valid!")
 			}
 		}
 		setBoard([...board]); 
@@ -269,7 +267,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		if (row < 7 && board[row + 1][column].valueColor !== playerColor) {
 			movements.push([row + 1, column]);
 		}
-		if (turn && movedPieces[column] === false) { // this should calculate if the king moved, not the current column
+		if (turn && movedPieces[KING] === false) {
 			if (isCastlingAllowed(board, movedPieces, row, column, 0, playerColor, turn)) {
 				movements.push([7, column - 2]);
 			}
@@ -281,13 +279,12 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 	}
 
 	const isCastlingAllowed = (board, movedPieces, row, column, rookColumn, playerColor, player) => {
-		if (movedPieces[rookColumn] === true) { // if the rook has been moved before, it's not valid
+		if (movedPieces[rookColumn === 7 ? RIGHTROOK : LEFTROOK	] === true) { // if the rook has been moved before, it's not valid
 			return false;
 		}
 		const castlingSideFactor = rookColumn > column ? 1 : -1;
-		let i = column + castlingSideFactor; // if there is a piece in the middle, it's not valid
+		let i = column + castlingSideFactor; // if there is a piece between the king and the rook, it's not valid
 		while (i !== rookColumn) {
-			console.log("row", row, "i", i, "column", column, "castlingsidefactor", castlingSideFactor, "rookColumn", rookColumn)
 			if (board[row][i].value !== null) {
 				return false;
 			}
@@ -392,22 +389,20 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const { pickedRow, pickedColumn } = picked;
 		const pickedCell = board[pickedRow][pickedColumn];
 		if (pickedCell.value === KING) {
-			movedPieces[pickedColumn] = true;
-			if (Math.abs(pickedColumn - column) > 1) {
+			movedPieces[KING] = true;
+			if (Math.abs(pickedColumn - column) > 1) { // if it was castling
 				const rookColumn = column < pickedColumn ? 0 : 7;
 				const movementDirection = column < pickedColumn ? -1 : 1
 				movePiece(board[pickedRow][rookColumn], board[pickedRow][pickedColumn + movementDirection], null)
-				movedPieces[rookColumn] = true;
-				setMovedPieces([...movedPieces]);
+				movedPieces[rookColumn === 7 ? RIGHTROOK : LEFTROOK] = true;
+				setMovedPieces({...movedPieces});
 			}
 		}
 		if (pickedRow === 7 && pickedCell.value === ROOK) {
-			movedPieces[pickedColumn] = true;
-			setMovedPieces([...movedPieces]);
+			movedPieces[pickedColumn === 7 ? RIGHTROOK : LEFTROOK] = true;
+			setMovedPieces({...movedPieces});
 		}
-		console.log(board[pickedRow][pickedColumn], promoted)
 		movePiece(board[pickedRow][pickedColumn], board[row][column], promoted)
-		console.log(board[row][column], promoted)
 		setPicked(null);
 		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
@@ -418,8 +413,8 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		const piece = unParse(data.piece);
 		const movement = unParse(data.movement);
 		if (movement.row === 7 && board[movement.row][movement.column].value === ROOK) {
-			movedPieces[movement.column] = true; // NO ANDA?
-			setMovedPieces([...movedPieces]);
+			movedPieces[movement.column === 7 ? RIGHTROOK : LEFTROOK] = true;
+			setMovedPieces({...movedPieces});
 		}
 		movePiece(board[piece.row][piece.column], board[movement.row][movement.column], translatePromotionToConstant[data.promoted])
 		if (board[movement.row][movement.column].value === KING && Math.abs(piece.column - movement.column) > 1) {
@@ -446,15 +441,12 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 	}
 
 	const sendMovement = (piece, movement, promoted) => {
-		// console.log("turn", turn, "game", game, "playerColor", playerColor)
 		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": translatePromotionToName[promoted]}
-		// console.log(data)
 		try {
 			axios.post(MOVEMENTS_URL, data).then(response => {
 				setLastMovement(response.data.pk)
 				const opponentColor = playerColor === WHITE ? BLACK : WHITE;
 				const movements = getAllowedMovements(board, movedPieces, opponentColor, OPPONENT);
-				// console.log("movements", movements)
 				if (movements.length === 0) {
 					endGame(CHECKMATE_PLAYER); //check if it's check mate or drawn
 					setTurn(null);
@@ -516,7 +508,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			return newMatrix;
 		};
 		setMovedPieces(() => {
-			const newMovedPieces = [false, null, null, false, null, null, null, false]
+			const newMovedPieces = {[KING]: false, [LEFTROOK]: false, [RIGHTROOK]: false}
 			setBoard(() => {
 				const newBoard = generateBoardChess();
 				setAllowedMovements(getAllowedMovements(newBoard, newMovedPieces, playerColor, PLAYER));
@@ -539,7 +531,7 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 			try {
 				const response = await fetch(`${MOVEMENTS_URL}?player=${opponentColor ? "True" : "False"}&game=${game}&pk__gt=${lastMovement}`);
 				const data = await response.json();
-				console.log('Data from backend:', data);
+				// console.log('Data from backend:', data);
 				if (data.length) {
 					setLastMovement(null)
 					moveOpponent(data[0]);

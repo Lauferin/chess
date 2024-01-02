@@ -14,9 +14,9 @@ const App = () => {
 	const startGame = (difficulty, color) => {
 		const data = {"player_color": color, "opponent": difficulty}
 		try {
-			console.log(color, difficulty)
+			// console.log(color, difficulty)
 			axios.post(GAMES_URL, data).then((response) => {
-				console.log("new game request accepted", response);
+				// console.log("new game request accepted", response);
 				setPlayerColor(color);
 				setGame(response.data.pk)
 			});
