@@ -7,7 +7,7 @@ export const BLACK = false
 export const GAME_ON = 0
 export const CHECKMATE_OPPONENT = -3
 export const CHECKMATE_PLAYER = -1
-export const DRAWN = -2
+export const STALEMATE = -2
 export const NOT_ENOUGH_PIECES = -3
 export const REPEATED_SEQUENCE = -4
 

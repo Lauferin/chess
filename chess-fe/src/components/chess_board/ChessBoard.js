@@ -5,8 +5,8 @@ import "./ChessBoard.css";
 import Piece from '../piece/Piece.js';
 import Promotion from "../promotion/Promotion";
 import axios from "axios";
-import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, MOVEMENTS_URL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, 
-	translatePromotionToName, translatePromotionToConstant, LEFT_ROOK, RIGHT_ROOK, DRAWN, GAME_ON} from "../../constants";
+import { WHITE, BLACK, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, STALEMATE, GAME_ON, MOVEMENTS_URL, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, 
+	translatePromotionToName, translatePromotionToConstant, LEFT_ROOK, RIGHT_ROOK} from "../../constants";
 
 const PLAYER = true;
 const OPPONENT = false;
@@ -384,6 +384,23 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		setRecentlyMoved([{"row": pickedRow, "column": pickedColumn}, {"row": movementRow, "column": movementColumn}]);
 	}
 
+	const getGameState = (board, movements) => {
+		if (movements.length === 0) {
+			const king = getPiecePosition(board, KING, playerColor);
+			const opponentMovements = calculateAllowedMovements(board, movedPieces, opponentColor, OPPONENT);
+			if (opponentMovements.some(e => e.movement[0] === king.row && e.movement[1] === king.column)) {
+				return CHECKMATE_OPPONENT;
+			} else {
+				return STALEMATE;
+			}
+		}
+		console.log("game on")
+		return GAME_ON;
+		// case not enough pieces. recorrer, si no hay reina o torre o peon de ningun color, 
+		// o si solo un caballo o solo un alfil, o dos caballos y del otro lado NADA
+		// case repeticion: hace falta otro hook
+	}
+
 	const move = (row, column, promoted) => {
 		const { pickedRow, pickedColumn } = picked;
 		const pickedCell = board[pickedRow][pickedColumn];
@@ -405,28 +422,15 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		setPicked(null);
 		paintRecentlyMoved(pickedRow, pickedColumn, row, column);
 		setBoard([...board]);
-		sendMovement(parse(pickedRow, pickedColumn), parse(row, column), promoted);
-	}
-
-	const getGameState = (board, movements) => {
-		// case checkmate y drawn: movements.length === 0 y calcular movements de oponente. si uno de ellos es comerse al rey, checkmate, else drawn
+		sendMovement(game, parse(pickedRow, pickedColumn), parse(row, column), promoted);
+		const opponentColor = playerColor === WHITE ? BLACK : WHITE;
+		const movements = getAllowedMovements(board, movedPieces, opponentColor, OPPONENT);
 		if (movements.length === 0) {
-			const king = getPiecePosition(board, KING, playerColor);
-			const opponentMovements = calculateAllowedMovements(board, movedPieces, opponentColor, OPPONENT);
-			console.log("opponentMovements", opponentMovements)
-			if (opponentMovements.some(e => e.movement[0] === king.row && e.movement[1] === king.column)) {
-				console.log("checkmate opponent")
-				return CHECKMATE_OPPONENT;
-			} else {
-				console.log("drawn")
-				return DRAWN;
-			}
+			endGame(CHECKMATE_PLAYER); // check stategame
+			setTurn(null);
+		} else {
+			setTurn(OPPONENT);
 		}
-		console.log("game on")
-		return GAME_ON;
-		// case not enough pieces. recorrer, si no hay reina o torre o peon de ningun color, 
-		// o si solo un caballo o solo un alfil, o dos caballos y del otro lado NADA
-		// case repeticion: hace falta otro hook
 	}
 
 	const moveOpponent = (data) => {
@@ -461,19 +465,11 @@ const ChessBoard = ({ game, playerColor, endGame }) => {
 		cell1.valueColor = null
 	}
 
-	const sendMovement = (piece, movement, promoted) => {
+	const sendMovement = (game, piece, movement, promoted) => {
 		const data = {"game": game, "player": playerColor, "piece": piece, "movement": movement, "promoted": translatePromotionToName[promoted]}
 		try {
 			axios.post(MOVEMENTS_URL, data).then(response => {
 				setLastMovement(response.data.pk)
-				const opponentColor = playerColor === WHITE ? BLACK : WHITE;
-				const movements = getAllowedMovements(board, movedPieces, opponentColor, OPPONENT);
-				if (movements.length === 0) {
-					endGame(CHECKMATE_PLAYER); //check if it's check mate or drawn
-					setTurn(null);
-				} else {
-					setTurn(OPPONENT);
-				}		
 			});
 		} catch (error) {
 			console.log("server unavailable or bad request", error)

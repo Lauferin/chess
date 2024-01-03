@@ -2,7 +2,7 @@ import React,  { useState, useEffect } from "react";
 import "./App.css";
 import axios from "axios";
 import ChessBoard from './components/chess_board/ChessBoard';
-import { WHITE, BLACK, GAMES_URL, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, DRAWN, REPEATED_SEQUENCE, NOT_ENOUGH_PIECES} from "./constants";
+import { WHITE, BLACK, GAMES_URL, CHECKMATE_PLAYER, CHECKMATE_OPPONENT, STALEMATE, REPEATED_SEQUENCE, NOT_ENOUGH_PIECES} from "./constants";
 
 const App = () => {
 
@@ -35,8 +35,8 @@ const App = () => {
 				return "You won!";
 			case CHECKMATE_OPPONENT:
 				return "You lost!";
-			case DRAWN:
-				return "Drawn!";
+			case STALEMATE:
+				return "Stalemate! (draw)";
 			case NOT_ENOUGH_PIECES:
 				return "Not enough pieces!";
 			case REPEATED_SEQUENCE:
